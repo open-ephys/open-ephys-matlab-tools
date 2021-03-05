@@ -47,7 +47,7 @@ classdef (Abstract) Recording
         - electrodes (index of electrode from which each spike originated)
         - metadata (contains information about each electrode)
 
-    Event data is stored in a pandas DataFrame containing four columns:
+    ttlEvent data is stored in a n x 4 array containing four columns:
         - timestamp
         - channel
         - nodeId (processor ID)
@@ -62,22 +62,22 @@ classdef (Abstract) Recording
         recordingIndex
 
         continuous
-        events
+        ttlEvents
         spikes
 
     end
 
-    methods 
+    methods
 
         function self = Recording(directory, experimentIndex, recordingIndex)
             
-            self.directory = directory
-            self.experimentIndex = experimentIndex
-            self.recordingIndex = recordingIndex
+            self.directory = directory;
+            self.experimentIndex = experimentIndex;
+            self.recordingIndex = recordingIndex;
 
-            self.continuous = []
-            self.events = []
-            self.spikes = []
+            self.continuous = containers.Map();
+            self.ttlEvents = containers.Map();
+            self.spikes = containers.Map();
 
         end
 
@@ -85,17 +85,20 @@ classdef (Abstract) Recording
 
     methods (Abstract)
 
-        load_spikes(self)
+        loadSpikes(self)
 
-        load_events(self)
+        loadEvents(self)
 
-        load_continuous(self)
+        loadContinuous(self)
 
+        %TODO:
+        %{
         bool = detect_format(directory) %Return True if the format matches the RecordNode directory contents
         
         list = detect_recordings(directory) %Finds Recording 
 
         str = toString(self) %Returns a string with information about the recording
+        %}
 
     end
 
