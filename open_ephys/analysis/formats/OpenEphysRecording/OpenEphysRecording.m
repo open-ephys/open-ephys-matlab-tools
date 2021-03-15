@@ -81,7 +81,7 @@ classdef OpenEphysRecording < Recording
                 stream.metadata.names = [];
                 stream.metadata.processorId = processorIds(i);
 
-                f = cellfun(@(x) regexp(x, '[\/]', 'split'), streamFiles, 'UniformOutput', false); f = vertcat(f{:}); f = f(:,end);
+                f = cellfun(@(x) regexp(x, '[\\/]', 'split'), streamFiles, 'UniformOutput', false); f = vertcat(f{:}); f = f(:,end);
                 f = cellfun(@(x) regexp(x, '[_.]', 'split'), f, 'UniformOutput', false); f = vertcat(f{:});
 
                 stream.samples = zeros(length(timestamps), length(streamFiles));
@@ -135,7 +135,7 @@ classdef OpenEphysRecording < Recording
 
             %Find all continuous files that belong to this experiment, return as a map indexed by processor id
             paths = glob(fullfile(self.directory, '*continuous'))
-            f = cellfun(@(x) regexp(x, '[\/]', 'split'), paths, 'UniformOutput', false); f = vertcat(f{:});
+            f = cellfun(@(x) regexp(x, '[\\/]', 'split'), paths, 'UniformOutput', false); f = vertcat(f{:});
             f = cellfun(@(x) regexp(x, '[._]', 'split'), f(:,end), 'UniformOutput', false);
 
             files = containers.Map();
