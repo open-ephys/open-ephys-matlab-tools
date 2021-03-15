@@ -57,7 +57,7 @@ if testOpenEphysFormat
 
 end
 
-testKwikFormat = true;
+testKwikFormat = false;
 if testKwikFormat
     
     path = 'KwikFormat/Record Node 118';
@@ -73,6 +73,37 @@ if testKwikFormat
         plot(stream.samples(:,1));
         subplot(2,1,2);
         plot(stream.samples(:,end));
+    end
+
+    figure;
+    %Plot the first spike waveform
+    spikeProcessors = rec.spikes.keys;
+    for i = 1:length(spikeProcessors)
+        spikeProcessor = rec.spikes(spikeProcessors{i});
+        [nElectrodes,nSamplesPerWaveform,nWaveforms] = size(spikeProcessor.waveforms);
+        plot(spikeProcessor.waveforms(:,:,1));
+        break
+    end
+
+    %TODO: Plot continuous, events and spikes on top of each other as one figure
+
+end
+
+testNwbFormat = true;
+if testNwbFormat
+    
+    path = 'NwbFormat_single_electrode/Record Node 118';
+    path = 'NwbFormat/Record Node 118';
+
+    rec = NwbRecording(path, 0, 0);
+
+    figure;
+    %Plot the first channel in each subprocessor
+    streams = rec.continuous.keys;
+    for i = 1:length(streams)
+        stream = rec.continuous(streams{i});
+        subplot(length(streams),1,i);
+        plot(stream.samples(1,:));
     end
 
     figure;
