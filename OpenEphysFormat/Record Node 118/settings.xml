@@ -4,7 +4,7 @@
   <INFO>
     <VERSION>0.5.3.1</VERSION>
     <PLUGIN_API_VERSION>7</PLUGIN_API_VERSION>
-    <DATE>12 Mar 2021 9:23:29</DATE>
+    <DATE>15 Mar 2021 19:40:43</DATE>
     <OS>Linux</OS>
     <MACHINE>Pavel</MACHINE>
   </INFO>
@@ -144,8 +144,20 @@
                  postPeakSamples="32" electrodeID="1">
         <SUBCHANNEL ch="0" thresh="50" isActive="1"/>
       </ELECTRODE>
+      <ELECTRODE name="Stereotrode 1" numChannels="2" prePeakSamples="8" postPeakSamples="32"
+                 electrodeID="2">
+        <SUBCHANNEL ch="1" thresh="50" isActive="1"/>
+        <SUBCHANNEL ch="2" thresh="50" isActive="1"/>
+      </ELECTRODE>
+      <ELECTRODE name="Tetrode 1" numChannels="4" prePeakSamples="8" postPeakSamples="32"
+                 electrodeID="3">
+        <SUBCHANNEL ch="3" thresh="50" isActive="1"/>
+        <SUBCHANNEL ch="4" thresh="50" isActive="1"/>
+        <SUBCHANNEL ch="5" thresh="50" isActive="1"/>
+        <SUBCHANNEL ch="6" thresh="50" isActive="1"/>
+      </ELECTRODE>
       <CHANNEL name="0" number="0">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
       </CHANNEL>
       <CHANNEL name="1" number="1">
         <SELECTIONSTATE param="0" record="0" audio="0"/>
@@ -154,16 +166,16 @@
         <SELECTIONSTATE param="0" record="0" audio="0"/>
       </CHANNEL>
       <CHANNEL name="3" number="3">
-        <SELECTIONSTATE param="0" record="0" audio="0"/>
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
       </CHANNEL>
       <CHANNEL name="4" number="4">
-        <SELECTIONSTATE param="0" record="0" audio="0"/>
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
       </CHANNEL>
       <CHANNEL name="5" number="5">
-        <SELECTIONSTATE param="0" record="0" audio="0"/>
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
       </CHANNEL>
       <CHANNEL name="6" number="6">
-        <SELECTIONSTATE param="0" record="0" audio="0"/>
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
       </CHANNEL>
       <CHANNEL name="7" number="7">
         <SELECTIONSTATE param="0" record="0" audio="0"/>
@@ -193,6 +205,8 @@
         <SELECTIONSTATE param="0" record="0" audio="0"/>
       </CHANNEL>
       <SPIKECHANNEL name="0" number="0"/>
+      <SPIKECHANNEL name="1" number="1"/>
+      <SPIKECHANNEL name="2" number="2"/>
       <EDITOR isCollapsed="0" displayName="Spike Detector"/>
     </PROCESSOR>
     <PROCESSOR name="Utilities/Merger" insertionPoint="1" pluginName="Merger"
@@ -303,6 +317,8 @@
       </CHANNEL>
       <EVENTCHANNEL name="0" number="0"/>
       <SPIKECHANNEL name="0" number="0"/>
+      <SPIKECHANNEL name="1" number="1"/>
+      <SPIKECHANNEL name="2" number="2"/>
       <EDITOR isCollapsed="0" displayName="LFP Viewer" Type="LfpDisplayEditor">
         <TAB Active="1"/>
         <WINDOW Active="0"/>
@@ -413,11 +429,23 @@
       </CHANNEL>
       <EVENTCHANNEL name="0" number="0"/>
       <SPIKECHANNEL name="0" number="0"/>
+      <SPIKECHANNEL name="1" number="1"/>
+      <SPIKECHANNEL name="2" number="2"/>
       <EDITOR isCollapsed="0" displayName="Spike Viewer" Type="Visualizer">
         <TAB Active="1"/>
         <WINDOW Active="0"/>
         <SPIKEDISPLAY LockThresholds="0" InvertSpikes="0">
           <PLOT>
+            <AXIS thresh="0" range="250"/>
+          </PLOT>
+          <PLOT>
+            <AXIS thresh="0" range="250"/>
+            <AXIS thresh="0" range="250"/>
+          </PLOT>
+          <PLOT>
+            <AXIS thresh="0" range="250"/>
+            <AXIS thresh="0" range="250"/>
+            <AXIS thresh="0" range="250"/>
             <AXIS thresh="0" range="250"/>
           </PLOT>
         </SPIKEDISPLAY>
@@ -525,6 +553,8 @@
       <EVENTCHANNEL name="0" number="0"/>
       <EVENTCHANNEL name="1" number="1"/>
       <SPIKECHANNEL name="0" number="0"/>
+      <SPIKECHANNEL name="1" number="1"/>
+      <SPIKECHANNEL name="2" number="2"/>
       <EDITOR isCollapsed="0" displayName="Record Node" Type="RecordNode">
         <SETTINGS path="/home/pavel/open-ephys" engine="2" recordEvents="1" recordSpikes="1">
           <SUBPROCESSOR src_id="106" sub_idx="0" isMaster="1" syncChannel="0">

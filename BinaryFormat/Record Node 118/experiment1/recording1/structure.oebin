@@ -412,6 +412,70 @@
             ]
           }
         ]
+      },
+      {
+        "folder_name": "Spike_Detector-110.0/spike_group_2/",
+        "sample_rate": 40000,
+        "source_processor": "Spike Detector",
+        "num_channels": 1,
+        "pre_peak_samples": 8,
+        "post_peak_samples": 32,
+        "channels": [
+          {
+            "channel_name": "ST  p110.0 n0",
+            "description": "Stereotrode spike data source",
+            "identifier": "spikesource",
+            "source_channel_info": [
+              {
+                "source_processor_id": 106,
+                "source_processor_sub_idx": 0,
+                "source_processor_channel": 1
+              },
+              {
+                "source_processor_id": 106,
+                "source_processor_sub_idx": 0,
+                "source_processor_channel": 2
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "folder_name": "Spike_Detector-110.0/spike_group_3/",
+        "sample_rate": 40000,
+        "source_processor": "Spike Detector",
+        "num_channels": 1,
+        "pre_peak_samples": 8,
+        "post_peak_samples": 32,
+        "channels": [
+          {
+            "channel_name": "TT  p110.0 n0",
+            "description": "Tetrode spike data source",
+            "identifier": "spikesource",
+            "source_channel_info": [
+              {
+                "source_processor_id": 106,
+                "source_processor_sub_idx": 0,
+                "source_processor_channel": 3
+              },
+              {
+                "source_processor_id": 106,
+                "source_processor_sub_idx": 0,
+                "source_processor_channel": 4
+              },
+              {
+                "source_processor_id": 106,
+                "source_processor_sub_idx": 0,
+                "source_processor_channel": 5
+              },
+              {
+                "source_processor_id": 106,
+                "source_processor_sub_idx": 0,
+                "source_processor_channel": 6
+              }
+            ]
+          }
+        ]
       }
     ]
   }

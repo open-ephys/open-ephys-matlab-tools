@@ -88,10 +88,9 @@ classdef OpenEphysRecording < Recording
 
                 for j = 1:length(f)
             
-                    channelNumber = str2num(f{j,2});
                     [timestamps, samples, header] = self.loadContinuousFile(streamFiles{j});
 
-                    stream.samples(1:length(samples),channelNumber) = samples;
+                    stream.samples(j,1:length(samples)) = samples;
 
                 end
 
@@ -123,6 +122,7 @@ classdef OpenEphysRecording < Recording
                     spikes = {};
 
                     spikes.waveforms = waveforms';
+                    spikes.timestamps = timestamps;
         
                     self.spikes(header('electrode')) = spikes;
 
@@ -260,13 +260,13 @@ classdef OpenEphysRecording < Recording
             s = dir(filename);
             numSpikes = floor(( s.bytes - self.NUM_HEADER_BYTES ) / SPIKE_RECORD_SIZE);
 
-            timestamps = zeros(numSpikes);
+            timestamps = zeros(numSpikes,1);
 
             fid = fopen(filename);
             fread(fid, self.NUM_HEADER_BYTES+1, 'char*1');
 
             for i  = 1:length(timestamps)
-                timestamp = fread(fid, 1, 'int64');
+                timestamps(i) = fread(fid, 1, 'int64');
                 fseek(fid, self.NUM_HEADER_BYTES + 1 + SPIKE_RECORD_SIZE * i, -1);
             end
 

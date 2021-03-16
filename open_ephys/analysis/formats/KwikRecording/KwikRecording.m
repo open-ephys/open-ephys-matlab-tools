@@ -53,7 +53,7 @@ classdef KwikRecording < Recording
 
                 %h5disp(kwdFiles{i});
 
-                info = h5info(kwdFiles{i})
+                info = h5info(kwdFiles{i});
 
                 stream.samples = h5read(kwdFiles{i}, ['/recordings/' num2str(self.recordingIndex) '/data'])';
 
@@ -61,7 +61,7 @@ classdef KwikRecording < Recording
 
                 startTime = timestamps(1,1);
 
-                stream.timestamps = startTime:(startTime + length(stream.samples));
+                stream.timestamps = startTime:(startTime + length(stream.samples) - 1);
 
                 self.continuous(num2str(i)) = stream;
 

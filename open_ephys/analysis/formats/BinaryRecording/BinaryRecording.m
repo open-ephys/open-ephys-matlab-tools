@@ -131,10 +131,16 @@ classdef BinaryRecording < Recording
                 folderName = fileparts(self.info.spikes(i).folder_name);
                 processorName = folderName(1);
                 id = strsplit(processorName(1), "-");
+                
+                ndim = ndims(spikes.waveforms);
 
-                %TODO: 
-                % if self.waveforms.ndim == 2:
-                %     self.waveforms = np.expand_dims(self.waveforms, 1)
+                if ndim > 2
+                    [~,numElectrodes,~] = size(spikes.waveforms);
+                else
+                    numElectrodes = 1;
+                end
+                
+                
 
                 self.spikes(spikes.id) = spikes;  
 
