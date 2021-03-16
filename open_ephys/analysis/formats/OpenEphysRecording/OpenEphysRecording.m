@@ -231,7 +231,7 @@ classdef OpenEphysRecording < Recording
             timestamps = timestamps.Data(1:2:end);
 
             data = memmapfile(filename, 'Writable', false, 'Offset', 1024);
-            data = reshape(data.Data, floor(self.EVENT_RECORD_SIZE / 2), length(timestamps))
+            data = reshape(data.Data, floor(self.EVENT_RECORD_SIZE / 2), length(timestamps));
             
             recordingNumber = data(15,:);
 
@@ -249,11 +249,11 @@ classdef OpenEphysRecording < Recording
 
             fid = fopen(filename);
             fread(fid, 1043, 'char*1');
-            numChannels = fread(fid, 1, 'uint16', 0, 'l')
-            numSamples = fread(fid, 1, 'uint16', 0, 'l')
+            numChannels = fread(fid, 1, 'uint16', 0, 'l');
+            numSamples = fread(fid, 1, 'uint16', 0, 'l');
             fclose(fid);
 
-            SPIKE_RECORD_SIZE = 42 + 2 * numChannels * numSamples + 4 * numChannels + 2 * numChannels + 2
+            SPIKE_RECORD_SIZE = 42 + 2 * numChannels * numSamples + 4 * numChannels + 2 * numChannels + 2;
 
             POST_BYTES = 4 * numChannels + 2 * numChannels + 2;
 

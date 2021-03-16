@@ -1,7 +1,7 @@
-testBinaryFormat = true;
+testBinaryFormat = false;
 if testBinaryFormat
     
-    path = 'BinaryFormat/Record Node 118';
+    path = 'SampleData/BinaryFormat/Record Node 118';
 
     rec = BinaryRecording(path, 1, 1);
 
@@ -40,7 +40,7 @@ if testBinaryFormat
     end
 
     figure('Name', 'BinaryFormatSpike', 'numbertitle', 'off');
-    %Plot the first spike waveform
+    %Plot all spikes from first spike
     spikeProcessors = rec.spikes.keys;
     for i = 1:length(spikeProcessors)
         spikeProcessor = rec.spikes(spikeProcessors{i});
@@ -51,10 +51,10 @@ if testBinaryFormat
 
 end
 
-testOpenEphysFormat = true;
+testOpenEphysFormat = false;
 if testOpenEphysFormat
     
-    path = 'OpenEphysFormat/Record Node 118';
+    path = 'SampleData/OpenEphysFormat/Record Node 118';
 
     rec = OpenEphysRecording(path, 0, 0);
 
@@ -105,10 +105,10 @@ if testOpenEphysFormat
 
 end
 
-testKwikFormat = true;
+testKwikFormat = false;
 if testKwikFormat
     
-    path = 'KwikFormat/Record Node 118';
+    path = 'SampleData/KwikFormat/Record Node 118';
 
     rec = KwikRecording(path, 0, 0);
 
