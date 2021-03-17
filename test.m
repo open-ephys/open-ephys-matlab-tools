@@ -1,217 +1,177 @@
-testBinaryFormat = false;
-if testBinaryFormat
+
+SAMPLE_RANGE = 1:40000; %plot 1 second of data
+p = generatePlotView();
+
+%BinaryFormat
+
+path = 'SampleData/BinaryFormat/Record Node 118';
+
+rec = BinaryRecording(path, 1, 1);
+
+streams = rec.continuous.keys;
+neuralData = rec.continuous(streams{1});
+eventData = rec.continuous(streams{2});
+
+plot(p(1), neuralData.samples(1,SAMPLE_RANGE)); hold(p(1), 'on');
+
+spikeProcessors = rec.spikes.keys;
+spikeProcessor = rec.spikes(spikeProcessors{1}); 
+
+t = spikeProcessor.timestamps(spikeProcessor.timestamps < 40000);
+tx = [t.';t.';nan(1,length(t))];
+ymin = double(min(neuralData.samples(1,SAMPLE_RANGE))).*ones(1,length(t));
+ymax = double(max(neuralData.samples(1,SAMPLE_RANGE))).*ones(1,length(t));
+ty = [ymin;ymax;nan(1,length(t))];
+plot(p(1), tx(:),ty(:));
+
+plot(p(2), eventData.samples(1,SAMPLE_RANGE)); hold(p(2), 'on');
+
+eventProcessors = rec.ttlEvents.keys;
+eventProcessor = eventProcessors{1};
+
+events = rec.ttlEvents(eventProcessor);
+t = events.timestamp(events.timestamp < 40000);
+tx = [t.';t.';nan(1,length(t))];
+ymin = double(min(eventData.samples(1,SAMPLE_RANGE))).*ones(1,length(t));
+ymax = double(max(eventData.samples(1,SAMPLE_RANGE))).*ones(1,length(t));
+ty = [ymin;ymax;nan(1,length(t))];
+plot(p(2), tx(:),ty(:));
+
+plot(p(3), spikeProcessor.waveforms(1,:));
+
+%OpenEphysFormat 
     
-    path = 'SampleData/BinaryFormat/Record Node 118';
+path = 'SampleData/OpenEphysFormat/Record Node 118';
 
-    rec = BinaryRecording(path, 1, 1);
+rec = OpenEphysRecording(path, 0, 0);
 
-    figure('Name', 'BinaryFormatContinuous', 'numbertitle', 'off');
-    streams = rec.continuous.keys;
-    for i = 1:length(streams)
+streams = rec.continuous.keys;
+neuralData = rec.continuous(streams{1});
+eventData = rec.continuous(streams{2});
 
-        stream = rec.continuous(streams{i});
-        subplot(length(streams),1,i);
-        plot(stream.samples(1,:)); hold on;
+plot(p(4), neuralData.samples(1,SAMPLE_RANGE)); hold(p(4), 'on');
 
-        if i == 1 %Stream 1 is 16CH neural data -- overlay detected spikes 
-            spikeProcessors = rec.spikes.keys;
-            for j = 1:length(spikeProcessors)
-                spikeProcessor = rec.spikes(spikeProcessors{j}); 
-                t = spikeProcessor.timestamps;
-                tx = [t.';t.';nan(1,length(t))];
-                ymin = double(min(stream.samples(1,:))).*ones(1,length(t));
-                ymax = double(max(stream.samples(1,:))).*ones(1,length(t));
-                ty = [ymin;ymax;nan(1,length(t))];
-                plot(tx(:),ty(:));
-                break; %only plot single electrode data
-            end
-        else   %Stream 2 is a 16CH sine wave -- overlay detected events (sine wave peaks)
-            eventProcessors = rec.ttlEvents.keys;
-            for j = 1:length(eventProcessors)
-                events = rec.ttlEvents(eventProcessors{j});
-                t = events.timestamp;
-                tx = [t.';t.';nan(1,length(t))];
-                ymin = double(min(stream.samples(1,:))).*ones(1,length(t));
-                ymax = double(max(stream.samples(1,:))).*ones(1,length(t));
-                ty = [ymin;ymax;nan(1,length(t))];
-                plot(tx(:),ty(:));
-            end
-        end
-    end
+spikeProcessors = rec.spikes.keys;
+spikeProcessor = rec.spikes(spikeProcessors{1}); 
 
-    figure('Name', 'BinaryFormatSpike', 'numbertitle', 'off');
-    %Plot all spikes from first spike
-    spikeProcessors = rec.spikes.keys;
-    for i = 1:length(spikeProcessors)
-        spikeProcessor = rec.spikes(spikeProcessors{i});
-        plot(spikeProcessor.waveforms(1,:));
-        sample = spikeProcessor.waveforms(1,:);
-        break;
-    end
+t = spikeProcessor.timestamps(spikeProcessor.timestamps < SAMPLE_RANGE(end));
+tx = [t.';t.';nan(1,length(t))];
+ymin = double(min(neuralData.samples(1,SAMPLE_RANGE))).*ones(1,length(t));
+ymax = double(max(neuralData.samples(1,SAMPLE_RANGE))).*ones(1,length(t));
+ty = [ymin;ymax;nan(1,length(t))];
+plot(p(4), tx(:),ty(:));
 
-end
+plot(p(5), eventData.samples(1,SAMPLE_RANGE)); hold(p(5), 'on');
 
-testOpenEphysFormat = false;
-if testOpenEphysFormat
-    
-    path = 'SampleData/OpenEphysFormat/Record Node 118';
+eventProcessors = rec.ttlEvents.keys;
+eventProcessor = eventProcessors{1};
 
-    rec = OpenEphysRecording(path, 0, 0);
+events = rec.ttlEvents(eventProcessor);
+t = events.timestamp(events.timestamp < SAMPLE_RANGE(end));
+tx = [t.';t.';nan(1,length(t))];
+ymin = double(min(eventData.samples(1,SAMPLE_RANGE))).*ones(1,length(t));
+ymax = double(max(eventData.samples(1,SAMPLE_RANGE))).*ones(1,length(t));
+ty = [ymin;ymax;nan(1,length(t))];
+plot(p(5), tx(:),ty(:));
 
-    figure;
-    streams = rec.continuous.keys;
-    for i = 1:length(streams)
+plot(p(6), spikeProcessor.waveforms(1,:));
 
-        stream = rec.continuous(streams{i});
-        subplot(length(streams),1,i);
-        plot(stream.samples(1,:)); hold on;
+%KWIKFormat
 
-        if i == 1 %Stream 1 is neural data -- overlay detected spikes 
-            spikeProcessors = rec.spikes.keys;
-            for j = 1:length(spikeProcessors)
-                spikeProcessor = rec.spikes(spikeProcessors{j}); 
-                t = spikeProcessor.timestamps - min(spikeProcessor.timestamps);
-                tx = [t.';t.';nan(1,length(t))];
-                ymin = double(min(stream.samples(1,:))).*ones(1,length(t));
-                ymax = double(max(stream.samples(1,:))).*ones(1,length(t));
-                ty = [ymin;ymax;nan(1,length(t))];
-                plot(tx(:),ty(:));
-                break; %only plot single electrode data
-            end
-        else   %Stream 2 is a sine wave -- overlay detected events (sine wave peaks)
-            eventProcessors = rec.ttlEvents.keys;
-            for j = 1:length(eventProcessors)
-                events = rec.ttlEvents(eventProcessors{j});
-                t = events.timestamp - min(events.timestamp);
-                tx = [t.';t.';nan(1,length(t))];
-                ymin = double(min(stream.samples(1,:))).*ones(1,length(t));
-                ymax = double(max(stream.samples(1,:))).*ones(1,length(t));
-                ty = [ymin;ymax;nan(1,length(t))];
-                plot(tx(:),ty(:));
-            end
+path = 'SampleData/KwikFormat/Record Node 118';
 
-        end
-    end
+rec = KwikRecording(path, 0, 0);
 
-    figure;
-    %Plot the first spike waveform
-    spikeProcessors = rec.spikes.keys;
-    for i = 1:length(spikeProcessors)
-        spikeProcessor = rec.spikes(spikeProcessors{i});
-        plot(spikeProcessor.waveforms(1,:));
-        sample = spikeProcessor.waveforms(1,:);
-        break;
-    end
+streams = rec.continuous.keys;
+%KWIK format only has one stream
+data = rec.continuous(streams{1});
 
-end
+plot(p(7), data.samples(SAMPLE_RANGE,17)); hold(p(7), 'on');
 
-testKwikFormat = false;
-if testKwikFormat
-    
-    path = 'SampleData/KwikFormat/Record Node 118';
+spikeProcessors = rec.spikes.keys;
+spikeProcessor = rec.spikes(spikeProcessors{1}); 
 
-    rec = KwikRecording(path, 0, 0);
+t = spikeProcessor.timestamps(spikeProcessor.timestamps < SAMPLE_RANGE(end));
+tx = [t.';t.';nan(1,length(t))];
+ymin = double(min(data.samples(SAMPLE_RANGE,17))).*ones(1,length(t));
+ymax = double(max(data.samples(SAMPLE_RANGE,17))).*ones(1,length(t));
+ty = [ymin;ymax;nan(1,length(t))];
+plot(p(7), tx(:),ty(:));
 
-    figure;
+plot(p(8), data.samples(SAMPLE_RANGE,1)); hold(p(8), 'on');
 
-    stream = rec.continuous.keys;
-    stream = rec.continuous(stream{1}); %KWIK only produces a single stream? 
+eventProcessors = rec.ttlEvents.keys;
+eventProcessor = eventProcessors{1};
 
-    subplot(2,1,1);
-    plot(stream.timestamps, stream.samples(:,17)); hold on;
-        
-    spikeProcessors = rec.spikes.keys;
-    for j = 1:length(spikeProcessors)
-        spikeProcessor = rec.spikes(spikeProcessors{j}); 
-        t = spikeProcessor.timestamps;
-        tx = [t.';t.';nan(1,length(t))];
-        ymin = double(min(stream.samples(:,1))).*ones(1,length(t));
-        ymax = double(max(stream.samples(:,1))).*ones(1,length(t));
-        ty = [ymin;ymax;nan(1,length(t))];
-        plot(tx(:),ty(:));
-        break; %only plot single-electrodes
-    end
+events = rec.ttlEvents(eventProcessor);
+t = events.timestamp(events.timestamp < SAMPLE_RANGE(end));
+tx = [t.';t.';nan(1,length(t))];
+ymin = double(min(eventData.samples(1,SAMPLE_RANGE))).*ones(1,length(t));
+ymax = double(max(eventData.samples(1,SAMPLE_RANGE))).*ones(1,length(t));
+ty = [ymin;ymax;nan(1,length(t))];
+plot(p(8), tx(:),ty(:));
 
+plot(p(9), spikeProcessor.waveforms(:,:,1));
 
-    subplot(2,1,2);
-    plot(stream.timestamps, stream.samples(:,1)); hold on;
+%NWBFormat
 
-    eventProcessors = rec.ttlEvents.keys;
-    for j = 1:length(eventProcessors)
-        events = rec.ttlEvents(eventProcessors{j});
-        t = events.timestamp;
-        tx = [t.';t.';nan(1,length(t))];
-        ymin = double(min(stream.samples(:,1))).*ones(1,length(t));
-        ymax = double(max(stream.samples(:,1))).*ones(1,length(t));
-        ty = [ymin;ymax;nan(1,length(t))];
-        plot(tx(:),ty(:));
-    end
+path = 'SampleData/NwbFormat/Record Node 118';
 
-    figure;
-    %Plot the first spike waveform
-    spikeProcessors = rec.spikes.keys;
-    for i = 1:length(spikeProcessors)
-        spikeProcessor = rec.spikes(spikeProcessors{i});
-        plot(spikeProcessor.waveforms(:,1));
-    end
+rec = NwbRecording(path, 0, 0);
 
-end
+streams = rec.continuous.keys;
+neuralData = rec.continuous(streams{1});
+eventData = rec.continuous(streams{2});
 
-testNwbFormat = true;
-if testNwbFormat
-    
-    path = 'NwbFormat_single_electrode/Record Node 118';
-    path = 'NwbFormat/Record Node 118';
+plot(p(10), neuralData.samples(1,SAMPLE_RANGE)); hold(p(10), 'on');
 
-    rec = NwbRecording(path, 0, 0);
+spikeProcessors = rec.spikes.keys;
+spikeProcessor = rec.spikes(spikeProcessors{1});
 
-    figure('Name', 'NWBFormatContinuous', 'numbertitle', 'off');
-    streams = rec.continuous.keys;
-    for i = 1:length(streams)
+t = spikeProcessor.timestamps(spikeProcessor.timestamps < 1.0);
+%Convert timestamps from seconds back to sample counts
+t = 40000.*t; %TODO: Should be able to pull sample rate automatically
+tx = [t.';t.';nan(1,length(t))];
+ymin = double(min(neuralData.samples(1,SAMPLE_RANGE))).*ones(1,length(t));
+ymax = double(max(neuralData.samples(1,SAMPLE_RANGE))).*ones(1,length(t));
+ty = [ymin;ymax;nan(1,length(t))];
+plot(p(10), tx(:),ty(:));
 
-        stream = rec.continuous(streams{i});
-        subplot(length(streams),1,i);
-        plot(40000.*stream.timestamps, stream.samples(1,:)); hold on;
+plot(p(11), eventData.samples(1,SAMPLE_RANGE)); hold(p(11), 'on');
 
-        if i == 1 %Stream 1 is neural data -- overlay detected spikes 
-            spikeProcessors = rec.spikes.keys;
-            for j = 1:length(spikeProcessors)
-                spikeProcessor = rec.spikes(spikeProcessors{j}); 
-                t = spikeProcessor.timestamps;
-                %Convert timestamps from seconds back to sample counts
-                t = 40000.*t; %TODO: Should be able to pull sample rate automatically
-                tx = [t.';t.';nan(1,length(t))];
-                ymin = double(min(stream.samples(1,:))).*ones(1,length(t));
-                ymax = double(max(stream.samples(1,:))).*ones(1,length(t));
-                ty = [ymin;ymax;nan(1,length(t))];
-                plot(tx(:),ty(:));
-                break; %only plot single electrode data
-            end
-        else   %Stream 2 is a sine wave -- overlay detected events (sine wave peaks)
-            eventProcessors = rec.ttlEvents.keys;
-            for j = 1:length(eventProcessors)
-                events = rec.ttlEvents(eventProcessors{j});
-                t = events.timestamp;
-                %Convert timestamps from seconds back to sample counts
-                t = 40000.*t; %TODO: Should be able to pull sample rate automatically
-                tx = [t.';t.';nan(1,length(t))];
-                ymin = double(min(stream.samples(1,:))).*ones(1,length(t));
-                ymax = double(max(stream.samples(1,:))).*ones(1,length(t));
-                ty = [ymin;ymax;nan(1,length(t))];
-                plot(tx(:),ty(:));
-            end
+eventProcessors = rec.ttlEvents.keys;
+eventProcessor = eventProcessors{1};
 
-        end
-    end
+events = rec.ttlEvents(eventProcessor);
+t = events.timestamp(events.timestamp < 1.0);
+t = 40000.*t; %TODO: Should be able to pull sample rate automatically
+tx = [t.';t.';nan(1,length(t))];
+ymin = double(min(eventData.samples(1,SAMPLE_RANGE))).*ones(1,length(t));
+ymax = double(max(eventData.samples(1,SAMPLE_RANGE))).*ones(1,length(t));
+ty = [ymin;ymax;nan(1,length(t))];
+plot(p(11), tx(:),ty(:));
 
-    figure('Name', 'NWBFormatSpike', 'numbertitle', 'off');
-    %Plot the first spike waveform
-    spikeProcessors = rec.spikes.keys;
-    for i = 1:length(spikeProcessors)
-        spikeProcessor = rec.spikes(spikeProcessors{i});
-        plot(spikeProcessor.waveforms(:,1));
-        sample = spikeProcessor.waveforms(:,1);
-        break;
-    end
+plot(p(12), spikeProcessor.waveforms(:,1));
+
+function p = generatePlotView()
+
+    f = figure();
+    set(gcf, 'Units', 'Normalized', 'OuterPosition', [0.25, 0.25, 0.50, 0.50]);
+
+    p(1)=subplot(3,4,1); %BinaryNeuralData
+    p(2)=subplot(3,4,5); %BinaryEventData
+    p(3)=subplot(3,4,9); %BinarySpikeData
+
+    p(4)=subplot(3,4,2); %OpenEphysNeuralData
+    p(5)=subplot(3,4,6); %OpenEphysEventData
+    p(6)=subplot(3,4,10); %OpenEphysSpikeData
+
+    p(7)=subplot(3,4,3); %KWIKNeuralData
+    p(8)=subplot(3,4,7); %KWIKEventData
+    p(9)=subplot(3,4,11); %KWIKSpikeData
+
+    p(10)=subplot(3,4,4); %NWBNeuralData
+    p(11)=subplot(3,4,8); %NWBEventData
+    p(12)=subplot(3,4,12); %NWBSpikeData
 
 end

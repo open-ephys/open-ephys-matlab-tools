@@ -108,11 +108,7 @@ classdef NetworkControl
 
         function sendTTL(self, channel, state)
 
-            if state == 1
-                zmq.core.send(self.socket, uint8(['TTL Channel=' num2str(channel) ' on=1']));
-            else
-                zmq.core.send(self.socket, uint8(['TTL Channel=' num2str(channel) ' on=0']));
-            end
+            zmq.core.send(['TTL Channel=' num2str(channel) ' on=' num2str(state)]);
             reply = char(zmq.core.recv(self.socket));
 
         end
