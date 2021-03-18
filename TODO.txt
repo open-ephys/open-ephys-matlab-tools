@@ -1,12 +1,9 @@
-Goal: Port python-tools to matlab
-
 TODO:
 
-Port analysis (done except for the following issues:)  
-    - OpenEphys format events and spikes timestamps are off 
-    - KWIK format spike data doesn't look correct
-Port control 
-    
-Port streaming
+1. Port analysis (done except for the following issues:)  
+    - OpenEphys format loading ~100x slower than other 3 formats
+    - KWIK format loaded spike data needs to be reshaped to match other formats
 
+2. Port control (DONE)
 
+3. Implement streaming (in progress...)

@@ -6,7 +6,9 @@ p = generatePlotView();
 
 path = 'SampleData/BinaryFormat/Record Node 118';
 
+t = tic;
 rec = BinaryRecording(path, 1, 1);
+fprintf('Loaded BinaryFormat data in %f seconds\n', toc(t));
 
 streams = rec.continuous.keys;
 neuralData = rec.continuous(streams{1});
@@ -40,10 +42,12 @@ plot(p(2), tx(:),ty(:));
 plot(p(3), spikeProcessor.waveforms(1,:));
 
 %OpenEphysFormat 
-    
+
 path = 'SampleData/OpenEphysFormat/Record Node 118';
 
+t = tic;
 rec = OpenEphysRecording(path, 0, 0);
+fprintf('Loaded OpenEphysFormat data in %f seconds\n', toc(t));
 
 streams = rec.continuous.keys;
 neuralData = rec.continuous(streams{1});
@@ -80,10 +84,12 @@ plot(p(6), spikeProcessor.waveforms(1,:));
 
 path = 'SampleData/KwikFormat/Record Node 118';
 
+t = tic;
 rec = KwikRecording(path, 0, 0);
+fprintf('Loaded KwikFormat data in %f seconds\n', toc(t));
 
 streams = rec.continuous.keys;
-%KWIK format only has one stream
+%KWIK format only has one stream?
 data = rec.continuous(streams{1});
 
 plot(p(7), data.samples(SAMPLE_RANGE,17)); hold(p(7), 'on');
@@ -117,7 +123,9 @@ plot(p(9), spikeProcessor.waveforms(:,:,1));
 
 path = 'SampleData/NwbFormat/Record Node 118';
 
+t = tic;
 rec = NwbRecording(path, 0, 0);
+fprintf('Loaded NwbFormat data in %f seconds\n', toc(t));
 
 streams = rec.continuous.keys;
 neuralData = rec.continuous(streams{1});

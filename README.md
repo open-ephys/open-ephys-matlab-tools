@@ -1,5 +1,7 @@
 # Open Ephys Matlab Tools
 
+<img src="logo.png" width="300" />
+
 ## Overview
 
 This repository is meant to centralize and standardize Matlab-specific tools for interacting with the [Open Ephys GUI](https://github.com/open-ephys/plugin-GUI).
@@ -27,18 +29,19 @@ To use the control module:
 
 ```
 path = 'SampleData/BinaryFormat/Record Node 118';
-
 experimentIdx = 1;
-recordingIndex = 1;
+recordingIdx = 1;
 
 recording = BinaryRecording(path, experimentIdx, recordingIdx);
 
-streams = rec.continuous.keys;
+streams = recording.continuous.keys;
 
-NeuropixelsData = rec.continuous(streams{1});
-NIDAQData = rec.continuous(streams{2});
+NeuropixelsData = recording.continuous(streams{1});
+NIDAQData = recording.continuous(streams{2});
 
-plot(NeuropixelsData.samples(:,SAMPLE_RANGE)); 
+%Plot the first 30000 samples on all channels
+sampleRange = 1:30000 
+plot(NeuropixelsData.samples(:,sampleRange)); 
 ```
 
 ### control

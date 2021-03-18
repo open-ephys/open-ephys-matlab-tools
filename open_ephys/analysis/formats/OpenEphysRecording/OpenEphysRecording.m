@@ -67,7 +67,7 @@ classdef OpenEphysRecording < Recording
 
             files = self.findContinuousFiles();
 
-            processorIds = files.keys
+            processorIds = files.keys;
 
             for i = 1:length(processorIds)
 
@@ -102,7 +102,7 @@ classdef OpenEphysRecording < Recording
 
         function self = loadEvents(self)
 
-            filename = fullfile(self.directory, ['all_channels' self.experimentId '.events'])
+            filename = fullfile(self.directory, ['all_channels' self.experimentId '.events']);
 
             [timestamps, processorId, state, channel, header] = self.loadEventsFile(filename, self.recordingIndex);
 
@@ -134,7 +134,7 @@ classdef OpenEphysRecording < Recording
         function files = findContinuousFiles(self)
 
             %Find all continuous files that belong to this experiment, return as a map indexed by processor id
-            paths = glob(fullfile(self.directory, '*continuous'))
+            paths = glob(fullfile(self.directory, '*continuous'));
             f = cellfun(@(x) regexp(x, '[\\/]', 'split'), paths, 'UniformOutput', false); f = vertcat(f{:});
             f = cellfun(@(x) regexp(x, '[._]', 'split'), f(:,end), 'UniformOutput', false);
 
@@ -278,8 +278,8 @@ classdef OpenEphysRecording < Recording
             [r,~] = size(data);
             waveforms = single(data(22:(r - floor(POST_BYTES/2)), mask==1));
             waveforms = waveforms - 32768;
-            waveforms = waveforms / 20000;
-            waveforms = waveforms * 1000;
+            %waveforms = waveforms / 20000;
+            %waveforms = waveforms * 1000;
 
         end
 
