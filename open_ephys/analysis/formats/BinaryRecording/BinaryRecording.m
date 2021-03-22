@@ -27,7 +27,6 @@ classdef BinaryRecording < Recording
     properties
 
         info
-        path
 
     end
 
@@ -37,9 +36,7 @@ classdef BinaryRecording < Recording
             
             self = self@Recording(directory, experimentIndex, recordingIndex);
 
-            self.path = fullfile(directory,['experiment',int2str(experimentIndex)],['recording',int2str(recordingIndex)]);
-
-            self.info = jsondecode(fileread(fullfile(self.path,'structure.oebin')));
+            self.info = jsondecode(fileread(fullfile(self.directory,'structure.oebin')));
 
             self = self.loadContinuous();
             self = self.loadEvents();
@@ -53,7 +50,7 @@ classdef BinaryRecording < Recording
 
             for i = 1:length(self.info.continuous)
 
-                directory = fullfile(self.path, 'continuous', self.info.continuous(i).folder_name);
+                directory = fullfile(self.directory, 'continuous', self.info.continuous(i).folder_name);
 
                 stream = {};
 
@@ -85,7 +82,7 @@ classdef BinaryRecording < Recording
 
         function self = loadEvents(self)
 
-            eventDirectories = glob(fullfile(self.path, 'events', '*', 'TTL*'));
+            eventDirectories = glob(fullfile(self.directory, 'events', '*', 'TTL*'));
 
             for i = 1:length(eventDirectories)
 
@@ -117,7 +114,7 @@ classdef BinaryRecording < Recording
 
             for i = 1:length(self.info.spikes)
 
-                directory = fullfile(self.path, 'spikes', self.info.spikes(i).folder_name);
+                directory = fullfile(self.directory, 'spikes', self.info.spikes(i).folder_name);
 
                 spikes = {};
 
@@ -153,7 +150,7 @@ classdef BinaryRecording < Recording
 
             syncMessages = containers.Map();
 
-            rawMessages = splitlines(fileread(fullfile(self.path, 'sync_messages.txt')));
+            rawMessages = splitlines(fileread(fullfile(self.directory, 'sync_messages.txt')));
 
             for i = 1:length(rawMessages)-1
 
@@ -172,6 +169,42 @@ classdef BinaryRecording < Recording
 
         end
 
+    end
+
+    methods (Static)
+        
+        function detectedFormat = detectFormat(directory)
+
+            detectedFormat = false;
+
+            binaryFiles = glob(fullfile(directory, 'experiment*', 'recording*'));
+        
+            if length(binaryFiles) > 0
+                detectedFormat = true;
+            end
+
+        end
+
+        function recordings = detectRecordings(directory)
+
+            recordings = {};
+
+            experimentDirectories = glob(fullfile(directory, 'experiment*'));
+            %sort
+
+            for i = 1:length(experimentDirectories)
+
+                recordingDirectories = glob(fullfile(experimentDirectories{i}, 'recording*'));
+                %sort
+
+                for j = 1:length(recordingDirectories)
+                    recordings{end+1} = BinaryRecording(recordingDirectories{i}, i, j);
+                end
+
+            end
+            
+        end
+        
     end
 
 end

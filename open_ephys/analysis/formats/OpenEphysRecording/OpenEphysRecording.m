@@ -49,10 +49,10 @@ classdef OpenEphysRecording < Recording
 
             self.recordSize = 4 + 8 + self.SAMPLES_PER_RECORD * self.BYTES_PER_SAMPLE + length(self.RECORD_MARKER);
 
-            if experimentIndex == 0
+            if experimentIndex == 1
                 self.experimentId = '';
             else
-                self.experimentId = ['_', num2str(experimentIndex + 1)];
+                self.experimentId = ['_', num2str(experimentIndex)];
             end
 
             self = self.loadContinuous();
@@ -117,6 +117,7 @@ classdef OpenEphysRecording < Recording
             for i = 1:length(fileTypes)
                 files = self.findSpikeFiles(fileTypes{i});
                 for j = 1:length(files)
+                    
                     [timestamps, waveforms, header] = self.loadSpikeFile(files{j}, self.recordingIndex);
 
                     spikes = {};
@@ -146,7 +147,7 @@ classdef OpenEphysRecording < Recording
                 if length(f{i}) > 3
                     experimentIndex = str2num(f{i}{3});
                 else
-                    experimentIndex = 0;
+                    experimentIndex = 1;
                 end
                 if experimentIndex == self.experimentIndex
                     if isKey(files, processorId)
@@ -169,7 +170,7 @@ classdef OpenEphysRecording < Recording
             searchString('stereotrode') = 'ST';
             searchString('tetrode') = 'TT';
 
-            if self.experimentIndex == 0
+            if self.experimentIndex == 1
                 paths = glob(fullfile(self.directory, [searchString(fileType), '*spikes']));
             else
                 paths = glob(fullfile(self.directory, [searchString(fileType), '*', self.experimentIndex, '*spikes']));
@@ -236,13 +237,14 @@ classdef OpenEphysRecording < Recording
             recordingNumber = data(15,:);
 
             mask = recordingNumber == recordingIndex;
+            
+            timestamps = timestamps(mask);
             processorId = data(12,mask)';
             state = data(13,mask)';
             channel = data(14,mask)';
 
         end
         
-            
         function [timestamps, waveforms, header] = loadSpikeFile(self, filename, recordingNumber)
 
             header = self.readHeader(filename);
@@ -285,8 +287,6 @@ classdef OpenEphysRecording < Recording
 
         function numRecords = getNumRecords(self, filename)
 
-            fr = matlab.io.datastore.DsFileReader(filename);
-
             s = dir(filename);
 
             numRecords = ( s.bytes - self.NUM_HEADER_BYTES ) / self.recordSize;
@@ -315,5 +315,134 @@ classdef OpenEphysRecording < Recording
 
     end
 
-    
+    methods (Static)
+        
+        function detectedFormat = detectFormat(directory)
+
+            detectedFormat = false;
+
+            openEphysFiles = glob(fullfile(directory, '*.events'));
+        
+            if ~isempty(openEphysFiles)
+                detectedFormat = true;
+            end
+
+        end
+
+        function recordings = detectRecordings(directory)
+
+            recordings = {};
+
+            messageFiles = glob(fullfile(directory, 'messages*events'));
+            %TODO: sort
+
+            for i = 1:length(messageFiles)
+                
+                experimentIndex = i - 1;
+
+                if i == 1
+                    experimentId = '';
+                else
+                    experimentId = ['_' num2str(i)];
+                end
+
+                continuousInfo = glob(fullfile(directory, ['Continuous_Data' experimentId '.openephys']));
+
+                foundRecording = false;
+
+                if ~isempty(continuousInfo)
+
+                    for j = 1:length(continuousInfo)
+
+                        info = xml2struct(continuousInfo{j});
+
+                        experimentIndex = str2num(info.EXPERIMENT.Attributes.number);
+
+                        for k = 1:length(info.EXPERIMENT.RECORDING)
+
+                            if length(info.EXPERIMENT.RECORDING) > 1
+                                recordingIndex = str2num(info.EXPERIMENT.RECORDING{1,k}.Attributes.number);
+                            else
+                                recordingIndex = str2num(info.EXPERIMENT.RECORDING.Attributes.number);
+                            end
+                            
+                            recordings{end+1} = OpenEphysRecording(directory, experimentIndex, recordingIndex);;
+
+                        end
+
+                    end
+                    
+                    foundRecording = true;
+
+                end
+
+                if ~foundRecording
+
+                    eventFile = glob(fullfile(directory, ['all_channels' experimentId '.events']));
+
+                    if ~isempty(eventFile)
+                        
+                        timestamps = memmapfile(eventFile{1}, 'Writable', false, 'Offset', 1024, 'Format', 'int64');
+                        timestamps = timestamps.Data(1:2:end);
+
+                        data = memmapfile(eventFile{1}, 'Writable', false, 'Offset', 1024);
+                        data = reshape(data.Data, floor(OpenEphysRecording.EVENT_RECORD_SIZE / 2), length(timestamps));
+                       
+                        recordingIndeces = unique(data(15,:));
+                        
+                        for j = 1:length(recordingIndeces)
+                            
+                            recordings{end+1} = OpenEphysRecording(directory, experimentIndex, recordingIndeces(j)); 
+                            
+                        end
+                        
+                    end
+                    
+                    foundRecording = true;
+
+                end
+                
+                if ~foundRecording
+
+                    spikesFile = glob(fullfile(directory, ['*n[0-9]' experimentId '.spikes']));
+
+                    if ~isempty(spikesFile)
+                        
+                        fid = fopen(spikesFile{1});
+                        fread(fid, 1043, 'char*1');
+                        numChannels = fread(fid, 1, 'uint16', 0, 'l');
+                        numSamples = fread(fid, 1, 'uint16', 0, 'l');
+                        fclose(fid);
+
+                        SPIKE_RECORD_SIZE = 42 + 2 * numChannels * numSamples + 4 * numChannels + 2 * numChannels + 2;
+
+                        s = dir(spikesFile{1});
+                        numSpikes = floor(( s.bytes - OpenEphysRecording.NUM_HEADER_BYTES ) / SPIKE_RECORD_SIZE);
+
+                        data = memmapfile(spikesFile{1}, 'Writable', false, 'Offset', OpenEphysRecording.NUM_HEADER_BYTES, 'Format', 'uint16');
+                        data = reshape(data.Data, floor(SPIKE_RECORD_SIZE / 2), numSpikes);
+                        
+                        recordingIndeces = unique(data(end,:));
+                        
+                        for j = 1:length(recordingIndeces)
+                            
+                            recordings{end+1} = OpenEphysRecording(directory, experimentIndex, recordingIndeces(j));
+                            
+                        end
+                        
+                    end
+                    
+                    foundRecording = true;
+                    
+                end
+                
+                if ~foundRecording
+                    fprintf("Could not find any data files\n");
+                end
+                
+            end
+            
+        end
+
+    end    
 end

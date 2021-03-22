@@ -159,4 +159,119 @@ classdef KwikRecording < Recording
 
     end
 
+    methods (Static)
+        
+        function detectedFormat = detectFormat(directory)
+
+            detectedFormat = false;
+
+            kwikFiles = glob(fullfile(directory, '*.kw*'));
+        
+            if length(kwikFiles) > 0
+                detectedFormat = true;
+            end
+
+        end
+
+        function recordings = detectRecordings(directory)
+
+            recordings = {};
+
+            foundRecording = false;
+
+            kweFiles = glob(fullfile(directory, 'experiment*.kwe'));
+            %sort 
+
+            if ~isempty(kweFiles)
+
+                for i = 1:length(kweFiles)
+
+                    experimentIndex = i - 1;
+
+                    info = h5info(kweFiles{i});
+
+                    for j = 1:length(info.Groups(2).Groups)
+
+                        recordingIndex = regexp(info.Groups(2).Groups(i).Name, '[\\/]', 'split'); 
+                        recordingIndex = str2num(recordingIndex{end});
+
+                        recordings{end+1} = KwikRecording(directory, experimentIndex, recordingIndex);
+
+                    end
+
+                end
+
+                foundRecording = true;
+
+            end
+
+            if ~foundRecording
+
+                kwdFiles = glob(fullfile(directory, 'experiment*.kwd'));
+                %sort
+
+                if ~isempty(kwdFiles) 
+
+                    for i = 1:length(kwdFiles)
+
+                        experimentIndex = i - 1;
+    
+                        info = h5info(kwdFiles{i});
+    
+                        for j = 1:length(info.Groups(2).Groups)
+    
+                            recordingIndex = regexp(info.Groups(2).Groups(i).Name, '[\\/]', 'split'); 
+                            recordingIndex = str2num(recordingIndex{end});
+    
+                            recordings{end+1} = KwikRecording(directory, experimentIndex, recordingIndex);
+    
+                        end
+    
+                    end
+    
+                    foundRecording = true;
+
+                end
+
+            end
+
+            if ~foundRecording
+
+                kwxFiles = glob(fullfile(directory, 'experiment*.kwx'));
+                %sort
+
+                if ~isempty(kwxFiles) 
+
+                    for i = 1:length(kwxFiles)
+
+                        experimentIndex = i - 1;
+    
+                        info = h5info(kwxFiles{i});
+    
+                        for j = 1:length(info.Groups(2).Groups)
+    
+                            recordingIndex = regexp(info.Groups(2).Groups(i).Name, '[\\/]', 'split'); 
+                            recordingIndex = str2num(recordingIndex{end});
+    
+                            recordings{end+1} = KwikRecording(directory, experimentIndex, recordingIndex);
+    
+                        end
+    
+                    end
+    
+                    foundRecording = true;
+
+                end
+
+            end
+
+            if ~foundRecording
+                disp('Could not find any data files!')
+            end
+
+
+        end
+        
+    end
+
 end

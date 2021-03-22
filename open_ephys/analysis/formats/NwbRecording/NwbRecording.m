@@ -44,9 +44,9 @@ classdef NwbRecording < Recording
 
         function self = loadContinuous(self)
 
-            dataFile = fullfile(self.directory, ['experiment_' num2str(self.experimentIndex+1) '.nwb']);
+            dataFile = fullfile(self.directory, ['experiment_' num2str(self.experimentIndex) '.nwb']);
 
-            streamInfo = h5info(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex + 1) '/continuous']);
+            streamInfo = h5info(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex) '/continuous']);
 
             for i = 1:length(streamInfo.Groups)
 
@@ -67,16 +67,16 @@ classdef NwbRecording < Recording
 
         function self = loadEvents(self)
 
-            dataFile = fullfile(self.directory, ['experiment_' num2str(self.experimentIndex+1) '.nwb']);
+            dataFile = fullfile(self.directory, ['experiment_' num2str(self.experimentIndex) '.nwb']);
 
-            eventInfo = h5info(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex + 1) '/events/ttl1']);
+            eventInfo = h5info(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex) '/events/ttl1']);
 
             name = strsplit(eventInfo.Attributes(5).Value, '_');
             nodeId = name{end};
 
-            timestamps = h5read(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex + 1) '/events/ttl1/timestamps']);
-            channels = h5read(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex + 1) '/events/ttl1/control']);
-            channelStates = h5read(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex + 1) '/events/ttl1/data']);
+            timestamps = h5read(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex) '/events/ttl1/timestamps']);
+            channels = h5read(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex) '/events/ttl1/control']);
+            channelStates = h5read(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex) '/events/ttl1/data']);
 
             %TODO (np.sign(dataset['data'][()]) + 1 / 2).astype('int')
 
@@ -86,9 +86,9 @@ classdef NwbRecording < Recording
 
         function self = loadSpikes(self)
 
-            dataFile = fullfile(self.directory, ['experiment_' num2str(self.experimentIndex+1) '.nwb']);
+            dataFile = fullfile(self.directory, ['experiment_' num2str(self.experimentIndex) '.nwb']);
 
-            spikeInfo = h5info(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex + 1) '/spikes']);
+            spikeInfo = h5info(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex) '/spikes']);
 
             channelGroups = spikeInfo.Groups;
 
@@ -153,6 +153,48 @@ classdef NwbRecording < Recording
             end
         end
 
+    end
+
+    methods (Static)
+        
+        function detectedFormat = detectFormat(directory)
+
+            detectedFormat = false;
+
+            nwbFiles = glob(fullfile(directory, '*.nwb'));
+        
+            if length(nwbFiles) > 0
+                detectedFormat = true;
+            end
+
+        end
+
+        function recordings = detectRecordings(directory)
+
+            recordings = {};
+
+            nwbFiles = glob(fullfile(directory, 'experiment*.nwb'));
+            %sort
+
+            for i = 1:length(nwbFiles)
+
+                experimentIndex = i;
+
+                streamInfo = h5info(nwbFiles{i}, '/acquisition/timeseries/');
+
+                for j = 1:length(streamInfo.Groups)
+
+                    recordingIndex = j;
+
+                    recordings{end+1} = NwbRecording(directory, experimentIndex, recordingIndex);
+                    
+                end
+
+
+            end
+
+        end
+        
     end
 
 end

@@ -91,14 +91,15 @@ classdef (Abstract) Recording
 
         loadContinuous(self)
 
-        %TODO:
-        %{
-        bool = detect_format(directory) %Return True if the format matches the RecordNode directory contents
-        
-        list = detect_recordings(directory) %Finds Recording 
+        %toString(self)
 
-        str = toString(self) %Returns a string with information about the recording
-        %}
+    end
+
+    methods(Abstract, Static)
+
+        detectFormat(directory) 
+        
+        detectRecordings(directory) 
 
     end
 
