@@ -39,8 +39,9 @@ classdef RecordNode < handle
 %}
 
     properties
-
+        
         directory
+        name
         format
         recordings
 
@@ -51,6 +52,9 @@ classdef RecordNode < handle
         function self = RecordNode(directory) 
 
             self.directory = directory;
+
+            folder = regexp(self.directory,filesep,'split');
+            self.name = folder{end-1};
 
             self.format = '';
             self.detectFormat();

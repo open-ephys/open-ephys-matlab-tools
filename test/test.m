@@ -9,6 +9,8 @@ p = generatePlotView();
 sessionDir = 'DelayedRecording';
 session = Session(sessionDir);
 
+session.show();
+
 for i = 1:length(session.recordNodes)
     
     node = session.recordNodes{i};

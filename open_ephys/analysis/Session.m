@@ -66,6 +66,17 @@ where N is the index of the Record Node (e.g., 0, 1, 2, ...)
 
         end
 
+        function show(self)
+
+            for i = 1:length(self.recordNodes)
+
+                node = self.recordNodes{i};
+                fprintf("(%d) %s : %s Format \n", i, node.name, node.format);
+
+            end
+            
+        end
+
     end
 
 end
