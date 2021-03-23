@@ -19,7 +19,7 @@ The Open Ephys GUI provides a great deal of flexibility when it comes to saving 
 To access the data for the first Record Node, enter:
 
 ```matlab
-recordnode = session.recordnodes{1} 
+recordNode = session.recordNodes{1} 
 ```
 
 If data from multiple Record Nodes is stored in the same directory, you can use the `show` function to view information about the Record Nodes in the `Session` object, e.g.:

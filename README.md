@@ -30,7 +30,7 @@ directory = '/path/to/data/2020-11-10_09-28-30' % for example
 session = Session(directory) 
 ```
 
-If the directory contains data from one more Record Nodes (GUI version 0.5+), the `session` object will contain a list of RecordNodes, accessible via `session.recordnodes[N]`, where `N = 1, 2, 3,`, etc.  
+If the directory contains data from one more Record Nodes (GUI version 0.5+), the `session` object will contain a list of RecordNodes, accessible via `session.recordNodes[N]`, where `N = 1, 2, 3,`, etc.  
 
 If your directory just contains data (any GUI version), individual recordings can be accessed via `session.recordings`. The format of the recordings will be detected automatically as either 
 [Binary](https://open-ephys.github.io/gui-docs/User-Manual/Recording-data/Binary-format.html), 

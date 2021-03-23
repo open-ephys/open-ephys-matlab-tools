@@ -1,3 +1,0 @@
-Software time: 54523@1000000Hz
-Processor: File Reader Id: 114 subProcessor: 0 start time: 54752@40000Hz
-Processor: File Reader Id: 106 subProcessor: 0 start time: 54752@40000Hz
