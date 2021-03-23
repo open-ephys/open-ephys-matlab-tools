@@ -45,13 +45,13 @@ classdef KwikRecording < Recording
         function self = loadContinuous(self)
 
 
-            kwdFiles = glob(fullfile(self.directory, ['experiment' num2str(self.experimentIndex + 1) '*.kwd']));
+            kwdFiles = glob(fullfile(self.directory, ['experiment' num2str(self.experimentIndex+1) '*.kwd']));
 
             for i = 1:length(kwdFiles)
 
                 stream = {};
 
-                %h5disp(kwdFiles{i});
+                stream.metadata = {};
 
                 info = h5info(kwdFiles{i});
 
@@ -59,9 +59,9 @@ classdef KwikRecording < Recording
 
                 timestamps = h5read(kwdFiles{i}, ['/recordings/' num2str(self.recordingIndex) '/application_data/timestamps']);
 
-                startTime = timestamps(1,1);
+                stream.metadata.startTimestamp = timestamps(1,1);
 
-                stream.timestamps = startTime:(startTime + length(stream.samples) - 1);
+                stream.timestamps = stream.metadata.startTimestamp:(stream.metadata.startTimestamp + length(stream.samples) - 1);
 
                 self.continuous(num2str(i)) = stream;
 
@@ -187,21 +187,25 @@ classdef KwikRecording < Recording
                 for i = 1:length(kweFiles)
 
                     experimentIndex = i - 1;
+                    
+                    try 
+                        info = h5info(kweFiles{i});
+                        
+                        foundRecording = true;
 
-                    info = h5info(kweFiles{i});
+                        for j = 1:length(info.Groups(2).Groups)
 
-                    for j = 1:length(info.Groups(2).Groups)
+                            recordingIndex = regexp(info.Groups(2).Groups(i).Name, '[\\/]', 'split'); 
+                            recordingIndex = str2num(recordingIndex{end});
 
-                        recordingIndex = regexp(info.Groups(2).Groups(i).Name, '[\\/]', 'split'); 
-                        recordingIndex = str2num(recordingIndex{end});
+                            recordings{end+1} = KwikRecording(directory, experimentIndex, recordingIndex);
 
-                        recordings{end+1} = KwikRecording(directory, experimentIndex, recordingIndex);
-
+                        end
+                    catch ME
+                        break;
                     end
 
                 end
-
-                foundRecording = true;
 
             end
 

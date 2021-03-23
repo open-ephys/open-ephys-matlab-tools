@@ -52,8 +52,12 @@ classdef NwbRecording < Recording
 
                 stream = {};
 
+                stream.metadata = {};
+
                 stream.samples = h5read(dataFile, [streamInfo.Groups(i).Name '/data']);
                 stream.timestamps = h5read(dataFile, [streamInfo.Groups(i).Name '/timestamps']);
+
+                stream.metadata.startTimestamp = stream.timestamps(1);
 
                 %Get id of recorded processor
                 name = strsplit(streamInfo.Groups(i).Name, '_'); 

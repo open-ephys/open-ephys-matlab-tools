@@ -94,6 +94,8 @@ classdef OpenEphysRecording < Recording
 
                 end
 
+                stream.metadata.startTimestamp = timestamps(1);
+
                 self.continuous(processorIds{i}) = stream;
 
             end

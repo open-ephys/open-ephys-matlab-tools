@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<EXPERIMENT version="0.5" number="1" separatefiles="0">
+  <RECORDING number="0" samplerate="40000">
+    <PROCESSOR id="118">
+      <CHANNEL name="CH0" bitVolts="0.050000000745058059692" filename="114_1.continuous"
+               position="1024"/>
+      <CHANNEL name="CH1" bitVolts="0.050000000745058059692" filename="114_2.continuous"
+               position="1024"/>
+      <CHANNEL name="CH2" bitVolts="0.050000000745058059692" filename="114_3.continuous"
+               position="1024"/>
+      <CHANNEL name="CH3" bitVolts="0.050000000745058059692" filename="114_4.continuous"
+               position="1024"/>
+      <CHANNEL name="CH4" bitVolts="0.050000000745058059692" filename="114_5.continuous"
+               position="1024"/>
+      <CHANNEL name="CH5" bitVolts="0.050000000745058059692" filename="114_6.continuous"
+               position="1024"/>
+      <CHANNEL name="CH6" bitVolts="0.050000000745058059692" filename="114_7.continuous"
+               position="1024"/>
+      <CHANNEL name="CH7" bitVolts="0.050000000745058059692" filename="114_8.continuous"
+               position="1024"/>
+      <CHANNEL name="CH8" bitVolts="0.050000000745058059692" filename="114_9.continuous"
+               position="1024"/>
+      <CHANNEL name="CH9" bitVolts="0.050000000745058059692" filename="114_10.continuous"
+               position="1024"/>
+      <CHANNEL name="CH10" bitVolts="0.050000000745058059692" filename="114_11.continuous"
+               position="1024"/>
+      <CHANNEL name="CH11" bitVolts="0.050000000745058059692" filename="114_12.continuous"
+               position="1024"/>
+      <CHANNEL name="CH12" bitVolts="0.050000000745058059692" filename="114_13.continuous"
+               position="1024"/>
+      <CHANNEL name="CH13" bitVolts="0.050000000745058059692" filename="114_14.continuous"
+               position="1024"/>
+      <CHANNEL name="CH14" bitVolts="0.050000000745058059692" filename="114_15.continuous"
+               position="1024"/>
+      <CHANNEL name="CH15" bitVolts="0.050000000745058059692" filename="114_16.continuous"
+               position="1024"/>
+      <CHANNEL name="CH0" bitVolts="0.050000000745058059692" filename="106_17.continuous"
+               position="1024"/>
+      <CHANNEL name="CH1" bitVolts="0.050000000745058059692" filename="106_18.continuous"
+               position="1024"/>
+      <CHANNEL name="CH2" bitVolts="0.050000000745058059692" filename="106_19.continuous"
+               position="1024"/>
+      <CHANNEL name="CH3" bitVolts="0.050000000745058059692" filename="106_20.continuous"
+               position="1024"/>
+      <CHANNEL name="CH4" bitVolts="0.050000000745058059692" filename="106_21.continuous"
+               position="1024"/>
+      <CHANNEL name="CH5" bitVolts="0.050000000745058059692" filename="106_22.continuous"
+               position="1024"/>
+      <CHANNEL name="CH6" bitVolts="0.050000000745058059692" filename="106_23.continuous"
+               position="1024"/>
+      <CHANNEL name="CH7" bitVolts="0.050000000745058059692" filename="106_24.continuous"
+               position="1024"/>
+      <CHANNEL name="CH8" bitVolts="0.050000000745058059692" filename="106_25.continuous"
+               position="1024"/>
+      <CHANNEL name="CH9" bitVolts="0.050000000745058059692" filename="106_26.continuous"
+               position="1024"/>
+      <CHANNEL name="CH10" bitVolts="0.050000000745058059692" filename="106_27.continuous"
+               position="1024"/>
+      <CHANNEL name="CH11" bitVolts="0.050000000745058059692" filename="106_28.continuous"
+               position="1024"/>
+      <CHANNEL name="CH12" bitVolts="0.050000000745058059692" filename="106_29.continuous"
+               position="1024"/>
+      <CHANNEL name="CH13" bitVolts="0.050000000745058059692" filename="106_30.continuous"
+               position="1024"/>
+      <CHANNEL name="CH14" bitVolts="0.050000000745058059692" filename="106_31.continuous"
+               position="1024"/>
+      <CHANNEL name="CH15" bitVolts="0.050000000745058059692" filename="106_32.continuous"
+               position="1024"/>
+    </PROCESSOR>
+  </RECORDING>
+</EXPERIMENT>
