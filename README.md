@@ -18,10 +18,7 @@ It consists of three modules:
 
 All scripts and classes are available in the open-ephys directory. Make sure the open-ephys directory and the data to be analyzed are both on the Matlab search path.
 
-To use the control module:
-- Install the zmq libraries for your specific platform
-- Edit the paths to your zmq library file locations in control/matlab-zmq/config.m
-- Run control/matlab-zmq/make.m to generate the required .mex files
+See the control module README section for how to setup zmq with Matlab.
 
 ## Usage
 

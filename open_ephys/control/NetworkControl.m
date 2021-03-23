@@ -37,10 +37,18 @@ classdef NetworkControl
 
     methods
         
-        function self = NetworkControl()
+        function self = NetworkControl(varargin)
 
-            self.ipAddress = '127.0.0.1';
-            self.port = 5556;
+            if nargin == 0
+                self.ipAddress = '127.0.0.1';
+                self.port = 5556;
+            elseif nargin == 2
+                self.ipAddress = varargin{1};
+                self.port = varargin{2};
+            else
+                fprintf("Error: NetworkControl takes either 0 or 2 input parameters\n");
+                return;
+            end
             
             self.url = ['tcp://' self.ipAddress ':' num2str(self.port)];
 
