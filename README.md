@@ -24,38 +24,37 @@ See the control module README section for how to setup zmq with Matlab.
 
 ### analysis
 
+```matlab
+directory = '/path/to/data/2020-11-10_09-28-30' % for example
+
+session = Session(directory) 
 ```
-path = 'SampleData/BinaryFormat/Record Node 118';
-experimentIdx = 1;
-recordingIdx = 1;
 
-recording = BinaryRecording(path, experimentIdx, recordingIdx);
+If the directory contains data from one more Record Nodes (GUI version 0.5+), the `session` object will contain a list of RecordNodes, accessible via `session.recordnodes[N]`, where `N = 1, 2, 3,`, etc.  
 
-streams = recording.continuous.keys;
+If your directory just contains data (any GUI version), individual recordings can be accessed via `session.recordings`. The format of the recordings will be detected automatically as either 
+[Binary](https://open-ephys.github.io/gui-docs/User-Manual/Recording-data/Binary-format.html), 
+[Open Ephys](https://open-ephys.github.io/gui-docs/User-Manual/Recording-data/Binary-format.html), 
+[NWB 1.0](https://open-ephys.github.io/gui-docs/User-Manual/Recording-data/NWB-format.html), or 
+[KWIK](https://open-ephys.github.io/gui-docs/User-Manual/Recording-data/KWIK-format.html).
 
-NeuropixelsData = recording.continuous(streams{1});
-NIDAQData = recording.continuous(streams{2});
+Each `recording` object has the following fields:
 
-%Plot the first 30000 samples on all channels
-sampleRange = 1:30000 
-plot(NeuropixelsData.samples(:,sampleRange)); 
-```
+* `continuous` : continuous data for each subprocessor in the recording
+* `spikes` : spikes for each electrode group
+* `events` : Pandas `DataFrame` Matlab analog of event times and metadata
+
+More details about `continuous`, `spikes`, and `events` objects can be found in the [analysis module README file](open_ephys/analysis/README.md).
 
 ### control
 
-```
-control = NetworkControl()
+```matlab
+url = '10.128.50.10' % IP address of the computer running Open Ephys 
+port = 2000 
 
-control.startAcquisition();
-control.startRecording();
+gui = NetworkControl(url, port)
 
-control.isRecording(); %returns true
-
-control.stopRecording();
-
-control.isRecording(); %returns false
-
-control.stopAcquisition();
+gui.startAcquisition %starts acquisition
 ```
 
 ### streaming
