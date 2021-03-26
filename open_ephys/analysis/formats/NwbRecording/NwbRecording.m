@@ -1,34 +1,26 @@
-%{
-MIT License
-
-Copyright (c) 2021 Open Ephys
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-%}
+% MIT License
+% 
+% Copyright (c) 2021 Open Ephys
+% 
+% Permission is hereby granted, free of charge, to any person obtaining a copy
+% of this software and associated documentation files (the "Software"), to deal
+% in the Software without restriction, including without limitation the rights
+% to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+% copies of the Software, and to permit persons to whom the Software is
+% furnished to do so, subject to the following conditions:
+% 
+% The above copyright notice and this permission notice shall be included in all
+% copies or substantial portions of the Software.
+% 
+% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+% IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+% FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+% AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+% LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+% SOFTWARE.
 
 classdef NwbRecording < Recording
-
-    properties
-
-        path
-
-    end
 
     methods 
 
@@ -59,7 +51,6 @@ classdef NwbRecording < Recording
 
                 stream.metadata.startTimestamp = stream.timestamps(1);
 
-                %Get id of recorded processor
                 name = strsplit(streamInfo.Groups(i).Name, '_'); 
                 processorId = name{end};
 
@@ -81,8 +72,8 @@ classdef NwbRecording < Recording
             timestamps = h5read(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex) '/events/ttl1/timestamps']);
             channels = h5read(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex) '/events/ttl1/control']);
             channelStates = h5read(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex) '/events/ttl1/data']);
-
-            %TODO (np.sign(dataset['data'][()]) + 1 / 2).astype('int')
+            
+            channelStates = (channelStates + 1) / 2;
 
             self.ttlEvents(nodeId) = DataFrame(channels, timestamps, str2double(nodeId)*ones(length(channels),1), channelStates, 'VariableNames', {'channel','timestamp','nodeID','state'});
 
@@ -149,7 +140,11 @@ classdef NwbRecording < Recording
                 [~,order] = sort(spikes.timestamps);
 
                 spikes.timestamps = spikes.timestamps(order);
+                
                 spikes.waveforms = spikes.waveforms(:,:,order);
+                %waveforms = permute(spikes.waveforms,[1 3 2]);
+                %spikes.waveforms = reshape(waveforms, [], size(spikes.waveforms,2), 1);
+
                 spikes.electrodes = spikes.electrodes(order);
 
                 self.spikes(num2str(count)) = spikes;
