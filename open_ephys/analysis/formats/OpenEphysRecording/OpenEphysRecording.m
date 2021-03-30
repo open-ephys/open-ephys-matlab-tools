@@ -102,6 +102,12 @@ classdef OpenEphysRecording < Recording
 
             filename = fullfile(self.directory, ['all_channels' self.experimentId '.events']);
 
+            s = dir(filename);
+            if s.bytes == 1024
+                fprintf("Event file at %s does not contain any event data!\n", filename);
+                return
+            end
+
             [timestamps, processorId, state, channel, header] = self.loadEventsFile(filename, self.recordingIndex);
 
             self.ttlEvents('all') = DataFrame(channel + 1, timestamps, processorId, state, 'VariableNames', {'channel','timestamp','nodeID','state'}); 
@@ -363,7 +369,7 @@ classdef OpenEphysRecording < Recording
                                 recordingIndex = str2num(info.EXPERIMENT.RECORDING.Attributes.number);
                             end
                             
-                            recordings{end+1} = OpenEphysRecording(directory, experimentIndex, recordingIndex);;
+                            recordings{end+1} = OpenEphysRecording(directory, experimentIndex, recordingIndex);
 
                         end
 
