@@ -52,7 +52,7 @@ classdef OpenEphysRecording < Recording
             else
                 self.experimentId = ['_', num2str(experimentIndex)];
             end
-
+               
             self = self.loadContinuous();
             self = self.loadEvents();
             self = self.loadSpikes();
@@ -185,44 +185,61 @@ classdef OpenEphysRecording < Recording
         end
 
         function [timestamps, samples, header] = loadContinuousFile(self, filename)
-
-            fid = fopen(filename);
-            hdr = fread(fid, self.NUM_HEADER_BYTES, 'char*1');
-
-            numRecords = self.getNumRecords(filename);
-            header = self.readHeader(filename);
-
-            timestamps = [];
-            samples = [];
-            recordingNumbers = [];
-            for i = 1:numRecords
-                timestamp = fread(fid, 1, 'int64',0,'l');
-                timestamps = [timestamps, timestamp];
-                N = fread(fid, 1, 'uint16',0,'l');
-                recordingNumber = fread(fid, 1, 'uint16', 0, 'l');
-                recordingNumbers = [recordingNumbers, recordingNumber];
-                samples = [samples; fread(fid, N, 'int16',0,'b')];
-                recordmarker = fread(fid, 10, 'char*1');
-            end
-            fclose(fid);
             
-            %TODO: Implement memory mapping for faster loading (not yet working)
-            % data = memmapfile(filename, 'Writable', false, 'Format', 'int16', 'Offset', self.NUM_HEADER_BYTES);
+            header = self.readHeader(filename);
+            numRecords = self.getNumRecords(filename);
 
-            % samples = reshape(data.Data, [floor(self.recordSize / 2), numRecords]);
+            %TODO: Use memory mapping based on file size. If file size is too small, memory mapping will waste space. 
+            useMemoryMapping = false;
 
-            % validRecords = samples(end-4,:) == self.recordingIndex * 256;
+            if ~useMemoryMapping
+                
+                fid = fopen(filename);
+                fread(fid, self.NUM_HEADER_BYTES, 'char*1'); %header
 
-            % sampleMask = zeros(floor(self.recordSize / 2));
-            % sampleMask(7:end-6) = 1;
-            % sampleMask = repmat(sampleMask, numRecords, 1);
+                timestamps = [];
+                samples = [];
 
-            % recordMask = zeros(floor(self.recordSize / 2), numRecords);
-            % recordMask(validRecords,:) = 1;
+                for i = 1:numRecords
+                    
+                    timestamp = fread(fid, 1, 'int64',0,'l');
+                    N = fread(fid, 1, 'uint16',0,'l');
+                    recordingNumber = fread(fid, 1, 'uint16', 0, 'l');
+                    if recordingNumber == self.recordingIndex
+                        timestamps = [timestamps, timestamp];
+                        samples = [samples; fread(fid, N, 'int16',0,'b')]; %big-endian
+                    elseif recordingNumber > self.recordingIndex
+                        break;
+                    end
+                    fread(fid, 10, 'char*1'); %recordMarker
+                    
+                end
+                
+                fclose(fid);
+                
+            else %Use memory mapping to load data
+                
+                %Load all data after the header into a memory mapped file as int16
+                data = memmapfile(filename, 'Writable', false, 'Format', 'int16', 'Offset', self.NUM_HEADER_BYTES);
 
-            % mask = sampleMask * recordMask;
-
-            % firstRecord = min(find(mask))
+                %Reshape into recorded blocks
+                dataSamples = reshape(data.Data, [floor(self.recordSize / 2), numRecords]);
+                
+                %Get mask for current recording
+                validRecords = dataSamples(6,:) == self.recordingIndex;
+                
+                %Isolate valid samples and convert to big endian
+                validSamples = swapbytes(dataSamples(7:end-5,validRecords));
+                
+                %Vectorize
+                samples = validSamples(:);
+                
+                %Generate timestamps
+                timestamps = memmapfile(filename, 'Writable', false, 'Format', 'int64', 'Offset', self.NUM_HEADER_BYTES, 'Repeat', 1);
+                timestamps = timestamps.Data(1);
+                timestamps = timestamps:(length(samples)/1024);
+                
+            end
 
         end
 
