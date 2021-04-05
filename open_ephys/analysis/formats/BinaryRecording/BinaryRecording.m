@@ -87,7 +87,7 @@ classdef BinaryRecording < Recording
                 files = regexp(eventDirectories{i},filesep,'split');
 
                 node = regexp(files{length(files)-2},'-','split');
-                fullId = strsplit(node{1,2},'.');
+                fullId = strsplit(node{1,length(node)},'.');
                 nodeId = str2num(fullId{1});
                 
                 channels = readNPY(fullfile(eventDirectories{i}, 'channels.npy'));
