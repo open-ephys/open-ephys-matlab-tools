@@ -27,6 +27,7 @@ classdef KwikRecording < Recording
         function self = KwikRecording(directory, experimentIndex, recordingIndex) 
             
             self = self@Recording(directory, experimentIndex, recordingIndex);
+            self.format = 'KWIK';
 
             self.loadContinuous();
             self.loadEvents();

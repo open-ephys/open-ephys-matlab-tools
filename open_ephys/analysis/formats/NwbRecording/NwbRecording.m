@@ -27,6 +27,7 @@ classdef NwbRecording < Recording
         function self = NwbRecording(directory, experimentIndex, recordingIndex) 
             
             self = self@Recording(directory, experimentIndex, recordingIndex);
+            self.format = 'NWB';
 
             self.loadContinuous();
             self.loadEvents();

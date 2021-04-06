@@ -33,6 +33,7 @@ classdef BinaryRecording < Recording
         function self = BinaryRecording(directory, experimentIndex, recordingIndex) 
             
             self = self@Recording(directory, experimentIndex, recordingIndex);
+            self.format = 'Binary';
 
             self.info = jsondecode(fileread(fullfile(self.directory,'structure.oebin')));
 
@@ -88,7 +89,8 @@ classdef BinaryRecording < Recording
 
                 node = regexp(files{length(files)-2},'-','split');
                 fullId = strsplit(node{1,length(node)},'.');
-                nodeId = str2num(fullId{1});
+                processorId = str2num(fullId{1});
+                subprocessorId = str2num(fullId{2});
                 
                 channels = readNPY(fullfile(eventDirectories{i}, 'channels.npy'));
                 timestamps = readNPY(fullfile(eventDirectories{i}, 'timestamps.npy'));
@@ -98,7 +100,8 @@ classdef BinaryRecording < Recording
 
                 id = [num2str(fullId{1}) '.' num2str(fullId{2})];
 
-                self.ttlEvents(id) = DataFrame(channels, timestamps, nodeId*ones(length(channels),1), channelStates, 'VariableNames', {'channel','timestamp','nodeID','state'});
+                self.ttlEvents(id) = DataFrame(channels, timestamps, processorId*ones(length(channels),1), subprocessorId*ones(length(channels),1), channelStates, ...
+                    'VariableNames', {'channel','timestamp','processorId','subprocessorId', 'state'});
 
             end
 

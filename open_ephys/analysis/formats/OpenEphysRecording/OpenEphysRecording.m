@@ -44,6 +44,7 @@ classdef OpenEphysRecording < Recording
         function self = OpenEphysRecording(directory, experimentIndex, recordingIndex) 
          
             self = self@Recording(directory, experimentIndex, recordingIndex);
+            self.format = 'OpenEphys';
 
             self.recordSize = 4 + 8 + self.SAMPLES_PER_RECORD * self.BYTES_PER_SAMPLE + length(self.RECORD_MARKER);
 
