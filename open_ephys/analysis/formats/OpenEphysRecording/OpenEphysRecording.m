@@ -81,13 +81,14 @@ classdef OpenEphysRecording < Recording
                 f = cellfun(@(x) regexp(x, '[\\/]', 'split'), streamFiles, 'UniformOutput', false); f = vertcat(f{:}); f = f(:,end);
                 f = cellfun(@(x) regexp(x, '[_.]', 'split'), f, 'UniformOutput', false); f = vertcat(f{:});
 
-                stream.samples = zeros(length(timestamps), length(streamFiles));
+                stream.samples = zeros(length(streamFiles), length(timestamps));
 
                 for j = 1:length(f)
             
                     [timestamps, samples, header] = self.loadContinuousFile(streamFiles{j});
 
-                    stream.samples(j,1:length(samples)) = samples;
+                    stream.samples(j,:) = samples';
+                    stream.timestamps = timestamps;
 
                 end
 
@@ -191,7 +192,7 @@ classdef OpenEphysRecording < Recording
             numRecords = self.getNumRecords(filename);
 
             %TODO: Use memory mapping based on file size. If file size is too small, memory mapping will waste space. 
-            useMemoryMapping = false;
+            useMemoryMapping = true;
 
             if ~useMemoryMapping
                 
@@ -207,8 +208,8 @@ classdef OpenEphysRecording < Recording
                     N = fread(fid, 1, 'uint16',0,'l');
                     recordingNumber = fread(fid, 1, 'uint16', 0, 'l');
                     if recordingNumber == self.recordingIndex
-                        timestamps = [timestamps, timestamp];
                         samples = [samples; fread(fid, N, 'int16',0,'b')]; %big-endian
+                        timestamps = [timestamps, timestamp:(timestamp + N - 1)];
                     elseif recordingNumber > self.recordingIndex
                         break;
                     end
@@ -237,8 +238,7 @@ classdef OpenEphysRecording < Recording
                 
                 %Generate timestamps
                 timestamps = memmapfile(filename, 'Writable', false, 'Format', 'int64', 'Offset', self.NUM_HEADER_BYTES, 'Repeat', 1);
-                timestamps = timestamps.Data(1);
-                timestamps = timestamps:(length(samples)/1024);
+                timestamps = timestamps.Data(1):(timestamps.Data(1) + length(samples) - 1);
                 
             end
 

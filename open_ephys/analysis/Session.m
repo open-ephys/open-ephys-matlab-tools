@@ -37,7 +37,7 @@ classdef Session < handle
     %   recordNodes - an array of all the record nodes corresponding to this session
     %
     % EXAMPLES:
-    %   session = Session( '2021-03-24_15-17-19' )
+    %   session = Session( '/home/open-ephys/2021-03-24_15-17-19' )
     %   session.show()
     %   
     %   node = session.recordNodes{1} 
