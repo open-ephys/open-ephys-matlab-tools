@@ -190,13 +190,13 @@ classdef BinaryRecording < Recording
             experimentDirectories = glob(fullfile(directory, 'experiment*'));
             %sort
 
-            for i = 1:length(experimentDirectories)
+            for expIdx = 1:length(experimentDirectories)
 
-                recordingDirectories = glob(fullfile(experimentDirectories{i}, 'recording*'));
+                recordingDirectories = glob(fullfile(experimentDirectories{expIdx}, 'recording*'));
                 %sort
 
-                for j = 1:length(recordingDirectories)
-                    recordings{end+1} = BinaryRecording(recordingDirectories{i}, i, j);
+                for recIdx = 1:length(recordingDirectories)
+                    recordings{end+1} = BinaryRecording(recordingDirectories{recIdx}, expIdx, recIdx);
                 end
 
             end
