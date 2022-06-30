@@ -56,14 +56,14 @@ classdef BinaryRecording < Recording
                 stream.metadata.sampleRate = self.info.continuous(i).sample_rate;
                 stream.metadata.numChannels = self.info.continuous(i).num_channels;
                 stream.metadata.processorId = self.info.continuous(i).source_processor_id;
-                stream.metadata.subprocessorId = self.info.continuous(i).source_processor_sub_idx;
+                stream.metadata.streamName = self.info.continuous(i).folder_name(1:end-1);
                 
                 stream.metadata.names = {};
                 for j = 1:length(self.info.continuous(i).channels)
                     stream.metadata.names{j} = self.info.continuous(i).channels(j).channel_name;
                 end
 
-                stream.metadata.id = [num2str(stream.metadata.processorId) '.' num2str(stream.metadata.subprocessorId)];
+                stream.metadata.id = num2str(stream.metadata.streamName);
 
                 stream.metadata.startTimestamp = syncMessages(stream.metadata.id);
 
@@ -82,26 +82,31 @@ classdef BinaryRecording < Recording
         function self = loadEvents(self)
 
             eventDirectories = glob(fullfile(self.directory, 'events', '*', 'TTL*'));
+            
+            streamIdx = 0;
 
             for i = 1:length(eventDirectories)
 
                 files = regexp(eventDirectories{i},filesep,'split');
 
                 node = regexp(files{length(files)-2},'-','split');
+                if length(node) > 2
+                    node = { node{1}, strjoin(node((2:length(node))), '-') };
+                end
                 fullId = strsplit(node{1,length(node)},'.');
                 processorId = str2num(fullId{1});
                 subprocessorId = str2num(fullId{2});
                 
-                channels = readNPY(fullfile(eventDirectories{i}, 'channels.npy'));
+                channels = readNPY(fullfile(eventDirectories{i}, 'states.npy'));
+                sampleNumbers = readNPY(fullfile(eventDirectories{i}, 'sample_numbers.npy'));
                 timestamps = readNPY(fullfile(eventDirectories{i}, 'timestamps.npy'));
-                channelStates = readNPY(fullfile(eventDirectories{i}, 'channel_states.npy'));
-
-                channelStates = (channelStates + 1) / 2;
 
                 id = [num2str(fullId{1}) '.' num2str(fullId{2})];
 
-                self.ttlEvents(id) = DataFrame(channels, timestamps, processorId*ones(length(channels),1), subprocessorId*ones(length(channels),1), channelStates, ...
-                    'VariableNames', {'channel','timestamp','processorId','subprocessorId', 'state'});
+                self.ttlEvents(id) = DataFrame(abs(channels), sampleNumbers, timestamps, processorId*ones(length(channels),1), streamIdx*ones(length(channels),1), channels > 0, ...
+                    'VariableNames', {'line','sample_number','timestamp','processor_id', 'stream_index', 'state'});
+                
+                streamIdx = streamIdx + 1;
 
             end
 
@@ -115,28 +120,17 @@ classdef BinaryRecording < Recording
 
             for i = 1:length(self.info.spikes)
 
-                directory = fullfile(self.directory, 'spikes', self.info.spikes(i).folder_name);
+                directory = fullfile(self.directory, 'spikes', self.info.spikes(i).folder);
 
                 spikes = {};
 
-                spikes.id = self.info.spikes(i).folder_name;
+                spikes.id = self.info.spikes(i).folder(1:end-1);
 
-                spikes.timestamps = readNPY(fullfile(directory, 'spike_times.npy'));
-                spikes.electrodes = readNPY(fullfile(directory, 'spike_electrode_indices.npy'));
-                spikes.waveforms = readNPY(fullfile(directory, 'spike_waveforms.npy'));
-
-                %self.info.spikes(i).folder_nam = Spike_Detector-101.0/spike_group_1/
-                folderName = fileparts(self.info.spikes(i).folder_name);
-                processorName = folderName(1);
-                id = strsplit(processorName(1), "-");
-                
-                ndim = ndims(spikes.waveforms);
-
-                if ndim > 2
-                    [~,numElectrodes,~] = size(spikes.waveforms);
-                else
-                    numElectrodes = 1;
-                end
+                spikes.timestamps = readNPY(fullfile(directory, 'timestamps.npy'));
+                spikes.electrodes = readNPY(fullfile(directory, 'electrode_indices.npy'));
+                spikes.waveforms = readNPY(fullfile(directory, 'waveforms.npy'));
+                spikes.clusters = readNPY(fullfile(directory, 'clusters.npy'));
+                spikes.sample_numbers = readNPY(fullfile(directory, 'sample_numbers.npy'));
                 
                 self.spikes(spikes.id) = spikes;  
 
@@ -154,13 +148,28 @@ classdef BinaryRecording < Recording
 
                 message = strsplit(rawMessages{i});
                 data = strsplit(message{end}, "@");
-                sampleFrequency = str2num(data{2}(1:end-2)); %Removes trailing 'Hz'
+                if length(data) == 1
+                    sampleFrequency = '';
+                else
+                    sampleFrequency = str2num(data{2}(1:end-2)); %Removes trailing 'Hz'
+                end
                 startTimestamp = str2num(data{1});
                 if message{1} == "Software" %found software time
-                    syncMessages("Software") = [startTimestamp, sampleFrequency];
+                    syncMessages("Software") = [startTimestamp];
                 else %extract unique processor id
-                    n = 1; while message{n} ~= "Id:" n = n + 1; end
-                    syncMessages(strcat(message{n+1}, ".", message{n+3})) = startTimestamp;
+                    n = 1; 
+                    while message{n} ~= "for" 
+                        n = n + 1; 
+                    end
+                    m = n;
+                    while message{m}(1) ~= "(" 
+                        m = m + 1; 
+                    end 
+                    processorName = strjoin(message([n+1 m-1]),'_');
+                    processorId = message{m}(2:(end-1));
+                    streamName = message{m+2};
+                    streamId = strcat(processorName, "-", processorId, ".", streamName);
+                    syncMessages(streamId) = startTimestamp;
                 end
 
             end
