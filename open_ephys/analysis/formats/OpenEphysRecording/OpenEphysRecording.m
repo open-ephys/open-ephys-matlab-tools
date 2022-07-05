@@ -55,8 +55,8 @@ classdef OpenEphysRecording < Recording
             end
                
             self = self.loadContinuous();
-            self = self.loadEvents();
-            self = self.loadSpikes();
+            %self = self.loadEvents();
+            %self = self.loadSpikes();
 
         end
 
@@ -102,7 +102,7 @@ classdef OpenEphysRecording < Recording
 
         function self = loadEvents(self)
 
-            filename = fullfile(self.directory, ['all_channels' self.experimentId '.events']);
+            filename = fullfile(self.directory, [self.streamName, '.events']);
 
             s = dir(filename);
             if s.bytes == 1024
@@ -149,9 +149,10 @@ classdef OpenEphysRecording < Recording
 
             for i = 1:length(f)
                 processorId = f{i}{1};
-                channel = str2num(f{i}{2});
-                if length(f{i}) > 3
-                    experimentIndex = str2num(f{i}{3});
+                streamName = f{i}{2};
+                channel = str2num(f{i}{3}(3:end));
+                if length(f{i}) > 4
+                    experimentIndex = str2num(f{i}{end-1});
                 else
                     experimentIndex = 1;
                 end
@@ -367,7 +368,7 @@ classdef OpenEphysRecording < Recording
                     experimentId = ['_' num2str(i)];
                 end
 
-                continuousInfo = glob(fullfile(directory, ['Continuous_Data' experimentId '.openephys']));
+                continuousInfo = glob(fullfile(directory, ['structure' experimentId '.openephys']));
 
                 foundRecording = false;
 

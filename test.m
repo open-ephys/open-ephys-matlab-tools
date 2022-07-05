@@ -2,8 +2,8 @@
 addpath(genpath("."));
 
 % Define a path to the recorded data
-path = 'C:\Users\Pavel\OneDrive\Documents\Open Ephys\2022-06-30_16-34-51'; %SourceSim
-%path = 'C:\Users\Pavel\OneDrive\Documents\Open Ephys\2022-06-29_20-51-10'; %FileReader
+path = 'C:\Users\Pavel\OneDrive\Documents\Open Ephys\2022-06-30_20-13-10'; %SourceSim
+%path = 'C:\Users\Pavel\OneDrive\Documents\Open Ephys\2022-06-30_18-37-31'; %FileReader
 
 % Create a session (loads all data at the path)
 session = Session(path);
@@ -17,8 +17,10 @@ for i = 1:nRecordNodes
     node = session.recordNodes{i};
     
     event_streams = node.recordings{1,1}.ttlEvents.keys();
-    some_stream = event_streams{1};
-    some_events = node.recordings{1,1}.ttlEvents(some_stream);
+    if length(event_streams) > 0
+        some_stream = event_streams{1};
+        some_events = node.recordings{1,1}.ttlEvents(some_stream);
+    end
       
     %Events are stored as a pandas DataFrame equivalent for each stream
     some_events.disp
