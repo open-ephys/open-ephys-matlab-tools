@@ -36,6 +36,8 @@ classdef OpenEphysRecording < Recording
 
         experimentId;
         recordSize;
+        
+        streams;
 
     end
 
@@ -53,48 +55,98 @@ classdef OpenEphysRecording < Recording
             else
                 self.experimentId = ['_', num2str(experimentIndex)];
             end
-               
+
+            self = self.loadStructure();
+       
             self = self.loadContinuous();
             %self = self.loadEvents();
             %self = self.loadSpikes();
 
         end
 
+        function self = loadStructure(self)
+
+            data = readstruct(fullfile(self.directory, 'structure.openephys'), "FileType", "xml");
+
+            self.streams = containers.Map;
+            
+            streamData = data.RECORDING(self.recordingIndex).STREAM;
+
+            for i = 1:length(streamData)
+
+                stream = {};
+
+                stream.nodeId = streamData(i).source_node_idAttribute;
+                stream.name = replace(streamData(i).nameAttribute, "_", "-");
+                stream.sampleRate = streamData(i).sample_rateAttribute;
+
+                stream.channels = {};
+
+                for j = 1:length(streamData(i).CHANNEL)
+
+                    data = {};
+
+                    data.name = streamData(i).CHANNEL(j).nameAttribute;
+                    data.bitVolts = streamData(i).CHANNEL(j).bitVoltsAttribute;
+                    data.position = streamData(i).CHANNEL(j).positionAttribute;
+                    data.filename = streamData(i).CHANNEL(j).filenameAttribute;
+
+                    stream.channels{end+1} = data;
+
+                end
+
+                %TODO: Events and spikes
+                stream.events.filename = streamData(i).EVENTS.filenameAttribute;
+                
+                nodeID = strcat(num2str(stream.nodeId), "_", stream.name);
+                self.streams(nodeID) = stream;
+                
+            end
+
+        end
+
         function self = loadContinuous(self)
 
+            % Get list of all continuous files
             files = self.findContinuousFiles();
 
-            processorIds = files.keys;
+            streamNames = self.streams.keys();
 
-            for i = 1:length(processorIds)
+            for i = 1:length(streamNames)
 
-                streamFiles = files(processorIds{i})';
+                % Find all continuous files belonging to this stream
+                streamFiles = {};
+                for j = 1:length(files)
+                    if contains(files{j}, streamNames{i})
+                        streamName = split(streamNames{i}, '_');
+                        processorId = streamName{1};
+                        streamFiles{end+1} = files{j};
+                    end
+                end
                 
                 [timestamps, ~, ~] = self.loadContinuousFile(streamFiles{1});
 
                 stream = {};
 
                 stream.metadata = {};
-                stream.metadata.names = [];
-                stream.metadata.processorId = processorIds(i);
 
-                f = cellfun(@(x) regexp(x, '[\\/]', 'split'), streamFiles, 'UniformOutput', false); f = vertcat(f{:}); f = f(:,end);
-                f = cellfun(@(x) regexp(x, '[_.]', 'split'), f, 'UniformOutput', false); f = vertcat(f{:});
+                stream.metadata.names = [];
+                stream.metadata.processorId = processorId;
+                stream.metadata.startTimestamp = timestamps(1);
+
+                stream.timestamps = timestamps;
 
                 stream.samples = zeros(length(streamFiles), length(timestamps));
 
-                for j = 1:length(f)
+                for j = 1:length(streamFiles)
             
-                    [timestamps, samples, header] = self.loadContinuousFile(streamFiles{j});
+                    [~, samples, ~] = self.loadContinuousFile(streamFiles{j});
 
                     stream.samples(j,:) = samples';
-                    stream.timestamps = timestamps;
 
                 end
 
-                stream.metadata.startTimestamp = timestamps(1);
-
-                self.continuous(processorIds{i}) = stream;
+                self.continuous(streamNames{i}) = stream;
 
             end
 
@@ -140,32 +192,23 @@ classdef OpenEphysRecording < Recording
 
         function files = findContinuousFiles(self)
 
-            %Find all continuous files that belong to this experiment, return as a map indexed by processor id
+            %Find all continuous files that belong to this experiment
+
             paths = glob(fullfile(self.directory, '*continuous'));
             f = cellfun(@(x) regexp(x, '[\\/]', 'split'), paths, 'UniformOutput', false); f = vertcat(f{:});
             f = cellfun(@(x) regexp(x, '[._]', 'split'), f(:,end), 'UniformOutput', false);
 
-            files = containers.Map();
+            files = {}; 
 
             for i = 1:length(f)
-                processorId = f{i}{1};
-                streamName = f{i}{2};
-                channel = str2num(f{i}{3}(3:end));
+
+                experimentIndex = 1;
                 if length(f{i}) > 4
-                    experimentIndex = str2num(f{i}{end-1});
-                else
-                    experimentIndex = 1;
+                    experimentIndex = str2double(f{i}{end-1});
                 end
                 if experimentIndex == self.experimentIndex
-                    if isKey(files, processorId)
-                        pFiles = files(processorId);
-                        pFiles{end+1} = paths{i};
-                        files(processorId) = pFiles;
-                    else
-                        files(processorId) = { paths{i} };
-                    end
+                    files{end+1} = paths{i};
                 end
-                %fprintf("Found processorId: %d, channel: %d experimentIdx: %d\n", processorId, channel, experimentIdx);
             end
 
         end
@@ -196,6 +239,8 @@ classdef OpenEphysRecording < Recording
             useMemoryMapping = true;
 
             if ~useMemoryMapping
+
+                %TODO: Test and fix non-memory mapped version
                 
                 fid = fopen(filename);
                 fread(fid, self.NUM_HEADER_BYTES, 'char*1'); %header
@@ -229,7 +274,7 @@ classdef OpenEphysRecording < Recording
                 dataSamples = reshape(data.Data, [floor(self.recordSize / 2), numRecords]);
                 
                 %Get mask for current recording
-                validRecords = dataSamples(6,:) == self.recordingIndex;
+                validRecords = dataSamples(6,:) == self.recordingIndex-1;
                 
                 %Isolate valid samples and convert to big endian
                 validSamples = swapbytes(dataSamples(7:end-5,validRecords));
