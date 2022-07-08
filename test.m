@@ -38,9 +38,8 @@ for i = 1:nRecordNodes
         end
 
     end
-      
-    %Events are stored as a pandas DataFrame equivalent for each stream
-    %some_events.disp
+     
+    electrodes = session.recordNodes{1,1}.recordings{1,1}.spikes.keys();
     
 end
 

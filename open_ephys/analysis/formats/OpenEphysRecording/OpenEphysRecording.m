@@ -60,7 +60,7 @@ classdef OpenEphysRecording < Recording
        
             self = self.loadContinuous();
             self = self.loadEvents();
-            %self = self.loadSpikes();
+            self = self.loadSpikes();
 
         end
 
@@ -95,8 +95,25 @@ classdef OpenEphysRecording < Recording
 
                 end
 
-                %TODO: Events and spikes
                 stream.events.filename = streamData(i).EVENTS.filenameAttribute;
+
+                if (isfield(streamData(i), 'SPIKECHANNEL'))
+
+                    stream.spikes = {};
+    
+                    for j = 1:length(streamData(i).SPIKECHANNEL)
+    
+                        data = {};
+    
+                        data.name = streamData(i).SPIKECHANNEL(j).nameAttribute;
+                        data.bitVolts = streamData(i).SPIKECHANNEL(j).bitVoltsAttribute;
+                        data.filename = streamData(i).SPIKECHANNEL(j).filenameAttribute;
+    
+                        stream.spikes{end+1} = data;
+    
+                    end
+
+                end
                 
                 nodeID = strcat(num2str(stream.nodeId), "_", stream.name);
                 self.streams(nodeID) = stream;
@@ -176,22 +193,29 @@ classdef OpenEphysRecording < Recording
 
         function self = loadSpikes(self)
 
-            fileTypes = {'single electrode', 'stereotrode', 'tetrode'};
+            streamNames = self.streams.keys();
 
-            for i = 1:length(fileTypes)
-                files = self.findSpikeFiles(fileTypes{i});
-                for j = 1:length(files)
-                    
-                    [timestamps, waveforms, header] = self.loadSpikeFile(files{j}, self.recordingIndex);
+            for i = 1:length(streamNames)
 
-                    spikes = {};
+                if isfield(self.streams(streamNames{i}), 'spikes')
 
-                    spikes.waveforms = waveforms';
-                    spikes.timestamps = timestamps;
-        
-                    self.spikes(header('electrode')) = spikes;
+                    for j = 1:length(self.streams(streamNames{i}).spikes)
+
+                        filename = fullfile(self.directory, self.streams(streamNames{i}).spikes{j}.filename);
+
+                        [timestamps, waveforms, header] = self.loadSpikeFile(filename, self.recordingIndex);
+    
+                        spikes = {};
+    
+                        spikes.waveforms = waveforms';
+                        spikes.timestamps = timestamps;
+            
+                        self.spikes(header('electrode')) = spikes;
+    
+                    end
 
                 end
+
             end
 
         end
@@ -348,7 +372,9 @@ classdef OpenEphysRecording < Recording
             data = memmapfile(filename, 'Writable', false, 'Offset', self.NUM_HEADER_BYTES, 'Format', 'uint16');
             data = reshape(data.Data, floor(SPIKE_RECORD_SIZE / 2), numSpikes);
 
-            mask = data(end,:) == recordingNumber;
+            mask = data(end,:) == recordingNumber - 1;
+
+            timestamps = timestamps(mask==1);
 
             [r,~] = size(data);
             waveforms = single(data(22:(r - floor(POST_BYTES/2)), mask==1));
