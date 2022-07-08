@@ -59,7 +59,7 @@ classdef OpenEphysRecording < Recording
             self = self.loadStructure();
        
             self = self.loadContinuous();
-            %self = self.loadEvents();
+            self = self.loadEvents();
             %self = self.loadSpikes();
 
         end
@@ -154,17 +154,23 @@ classdef OpenEphysRecording < Recording
 
         function self = loadEvents(self)
 
-            filename = fullfile(self.directory, [self.streamName, '.events']);
+            streamNames = self.streams.keys();
 
-            s = dir(filename);
-            if s.bytes == 1024
-                fprintf("Event file at %s does not contain any event data!\n", filename);
-                return
-            end
+            for i = 1:length(streamNames)
 
-            [timestamps, processorId, state, channel, header] = self.loadEventsFile(filename, self.recordingIndex);
+                filename = fullfile(self.directory, self.streams(streamNames{i}).events.filename);
 
-            self.ttlEvents('all') = DataFrame(channel + 1, timestamps, processorId, state, 'VariableNames', {'channel','timestamp','nodeID','state'}); 
+                s = dir(filename);
+                if s.bytes == 1024
+                    fprintf("Event file at %s does not contain any event data!\n", filename);
+                    return
+                end
+    
+                [timestamps, processorId, state, channel, header] = self.loadEventsFile(filename, self.recordingIndex);
+    
+                self.ttlEvents(streamNames{i}) = DataFrame(channel + 1, timestamps, processorId, state, 'VariableNames', {'channel','timestamp','nodeID','state'});
+
+            end 
 
         end
 
