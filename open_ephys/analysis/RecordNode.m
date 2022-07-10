@@ -78,10 +78,10 @@ classdef RecordNode < handle
                 self.format = 'Binary';
             elseif OpenEphysRecording.detectFormat(self.directory)
                 self.format = 'OpenEphys';
-            elseif KwikRecording.detectFormat(self.directory)
-                self.format = 'KWIK';
             elseif NwbRecording.detectFormat(self.directory)
                 self.format = 'NWB';
+            else 
+                error('No supported format was detected!');
             end
 
         end

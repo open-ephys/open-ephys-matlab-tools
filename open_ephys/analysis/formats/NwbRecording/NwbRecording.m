@@ -30,32 +30,52 @@ classdef NwbRecording < Recording
             self.format = 'NWB';
 
             self.loadContinuous();
-            self.loadEvents();
-            self.loadSpikes();
+            % self.loadEvents();
+            % self.loadSpikes();
 
         end
 
         function self = loadContinuous(self)
 
-            dataFile = fullfile(self.directory, ['experiment_' num2str(self.experimentIndex) '.nwb']);
+            dataFile = fullfile(self.directory, ['experiment' num2str(self.experimentIndex) '.nwb']);
 
-            streamInfo = h5info(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex) '/continuous']);
+            h5disp(dataFile);
+
+            streamInfo = h5info(dataFile, '/acquisition');%timeseries/recording' num2str(self.recordingIndex) '/continuous']);
 
             for i = 1:length(streamInfo.Groups)
 
-                stream = {};
+                groupName = strsplit(streamInfo.Groups(i).Name, '/');
 
-                stream.metadata = {};
+                streamName = groupName{end}
+
+                if strcmp(streamName, 'messages') || strcmp(streamName, 'sync_messages' )
+                    continue;
+                end
+
+                type = strsplit(streamInfo.Groups(i).Name, '.')
+
+                if strcmp(type{end}, 'TTL')
+                    continue;
+                end
+                 
+                stream.name = groupName{end};
 
                 stream.samples = h5read(dataFile, [streamInfo.Groups(i).Name '/data']);
                 stream.timestamps = h5read(dataFile, [streamInfo.Groups(i).Name '/timestamps']);
 
+                stream.metadata = {};
+
                 stream.metadata.startTimestamp = stream.timestamps(1);
+                stream.metadata.electrodes = h5read(dataFile, [streamInfo.Groups(i).Name '/electrodes']);
+                stream.metadata.conversion = h5read(dataFile, [streamInfo.Groups(i).Name '/channel_conversion']);
+                stream.metadata.sync = h5read(dataFile, [streamInfo.Groups(i).Name '/sync']);
 
-                name = strsplit(streamInfo.Groups(i).Name, '_'); 
-                processorId = name{end};
 
-                self.continuous(processorId) = stream;
+                %name = strsplit(streamInfo.Groups(i).Name, '_'); 
+                %processorId = name{end};
+
+                self.continuous(stream.name) = stream;
 
             end
 
@@ -180,7 +200,7 @@ classdef NwbRecording < Recording
 
                 experimentIndex = i;
 
-                streamInfo = h5info(nwbFiles{i}, '/acquisition/timeseries/');
+                streamInfo = h5info(nwbFiles{i}, '/acquisition/');
 
                 for j = 1:length(streamInfo.Groups)
 
