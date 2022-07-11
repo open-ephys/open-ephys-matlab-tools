@@ -30,8 +30,8 @@ classdef NwbRecording < Recording
             self.format = 'NWB';
 
             self.loadContinuous();
-            % self.loadEvents();
-            % self.loadSpikes();
+            self.loadEvents();
+            self.loadSpikes();
 
         end
 
@@ -39,21 +39,19 @@ classdef NwbRecording < Recording
 
             dataFile = fullfile(self.directory, ['experiment' num2str(self.experimentIndex) '.nwb']);
 
-            h5disp(dataFile);
-
-            streamInfo = h5info(dataFile, '/acquisition');%timeseries/recording' num2str(self.recordingIndex) '/continuous']);
+            streamInfo = h5info(dataFile, '/acquisition');
 
             for i = 1:length(streamInfo.Groups)
 
                 groupName = strsplit(streamInfo.Groups(i).Name, '/');
 
-                streamName = groupName{end}
+                streamName = groupName{end};
 
                 if strcmp(streamName, 'messages') || strcmp(streamName, 'sync_messages' )
                     continue;
                 end
 
-                type = strsplit(streamInfo.Groups(i).Name, '.')
+                type = strsplit(streamInfo.Groups(i).Name, '.');
 
                 if strcmp(type{end}, 'TTL')
                     continue;
@@ -71,7 +69,6 @@ classdef NwbRecording < Recording
                 stream.metadata.conversion = h5read(dataFile, [streamInfo.Groups(i).Name '/channel_conversion']);
                 stream.metadata.sync = h5read(dataFile, [streamInfo.Groups(i).Name '/sync']);
 
-
                 %name = strsplit(streamInfo.Groups(i).Name, '_'); 
                 %processorId = name{end};
 
@@ -83,20 +80,35 @@ classdef NwbRecording < Recording
 
         function self = loadEvents(self)
 
-            dataFile = fullfile(self.directory, ['experiment_' num2str(self.experimentIndex) '.nwb']);
+            dataFile = fullfile(self.directory, ['experiment' num2str(self.experimentIndex) '.nwb']);
 
-            eventInfo = h5info(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex) '/events/ttl1']);
+            streamInfo = h5info(dataFile, '/acquisition');
 
-            name = strsplit(eventInfo.Attributes(5).Value, '_');
-            nodeId = name{end};
+            for i = 1:length(streamInfo.Groups)
 
-            timestamps = h5read(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex) '/events/ttl1/timestamps']);
-            channels = h5read(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex) '/events/ttl1/control']);
-            channelStates = h5read(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex) '/events/ttl1/data']);
+                groupName = strsplit(streamInfo.Groups(i).Name, '/');
+
+                streamName = groupName{end};
+
+                type = strsplit(streamName, '.');
+
+                if ~strcmp(type{end}, 'TTL')
+                    continue;
+                end
+
+                eventInfo = streamInfo;
+
+                nodeId = strsplit(type{1},'-'); nodeId = nodeId{end};
+
+                timestamps = h5read(dataFile,[eventInfo.Groups(i).Name '/timestamps']);
+                data = h5read(dataFile,[eventInfo.Groups(i).Name '/data']);
+                sampleNumbers = h5read(dataFile,[eventInfo.Groups(i).Name '/sync']);
+                fullWord = h5read(dataFile,[eventInfo.Groups(i).Name '/full_word']);
             
-            channelStates = (channelStates + 1) / 2;
+                self.ttlEvents(streamName) = DataFrame(str2double(nodeId)*ones(length(timestamps),1), sampleNumbers, timestamps, abs(data), data > 0, ...
+                    'VariableNames', {'nodeId', 'sample_number', 'timestamp','channel','state'});
 
-            self.ttlEvents(nodeId) = DataFrame(channels, timestamps, str2double(nodeId)*ones(length(channels),1), channelStates, 'VariableNames', {'channel','timestamp','nodeID','state'});
+            end
 
         end
 
