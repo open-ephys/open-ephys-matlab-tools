@@ -114,75 +114,106 @@ classdef NwbRecording < Recording
 
         function self = loadSpikes(self)
 
-            dataFile = fullfile(self.directory, ['experiment_' num2str(self.experimentIndex) '.nwb']);
+            dataFile = fullfile(self.directory, ['experiment' num2str(self.experimentIndex) '.nwb']);
 
-            spikeInfo = h5info(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex) '/spikes']);
+            streamInfo = h5info(dataFile, '/acquisition');
 
-            channelGroups = spikeInfo.Groups;
+            for i = 1:length(streamInfo.Groups)
 
-            names = {};
-            for i = 1:length(channelGroups)
-                names{end+1} = channelGroups(i).Name;
-            end
+                groupName = strsplit(streamInfo.Groups(i).Name, '/');
 
-            channelCounts = [1 2 4];
+                streamName = groupName{end};
 
-            for count = 1:length(channelCounts)
+                if ~strcmp(streamInfo.Groups(i).Attributes(5).Value, 'SpikeEventSeries')
+                    continue;
+                end
+
+                spikeInfo = streamInfo;
+
+                %nodeId = strsplit(type{1},'-'); nodeId = nodeId{end};
 
                 spikes = {};
 
-                timestamps = {};
-                waveforms = {};
-                electrodes = {};
+                spikes.timestamps = h5read(dataFile,[spikeInfo.Groups(i).Name '/timestamps']);
+                spikes.data = h5read(dataFile,[spikeInfo.Groups(i).Name '/data']);
+                spikes.electrodes = h5read(dataFile,[spikeInfo.Groups(i).Name '/electrodes']);
+                spikes.conversion = h5read(dataFile,[spikeInfo.Groups(i).Name '/channel_conversion']);
+                spikes.sync = h5read(dataFile,[spikeInfo.Groups(i).Name '/sync']);
 
-                spikes.metadata = {};
-                spikes.metadata.names = names; %electrodeData keys
-
-                if length(channelGroups) > 1
-                
-                    for group = 1:length(channelGroups)
-
-                        channelGroup = channelGroups(group);
-
-                        if channelGroup.Datasets(1).ChunkSize(2) == channelCounts(count)
-
-                            waveforms{end+1} = h5read(dataFile, [channelGroup.Name '/data']);
-                            timestamps{end+1} = h5read(dataFile, [channelGroup.Name '/timestamps']);
-                            electrodes{end+1} = zeros(length(timestamps{end}),1);
-
-                        end
-
-                    end
-
-                else
-
-                    if channelGroups.Datasets(1).ChunkSize(2) == channelCounts(count)
-
-                        waveforms{end+1} = h5read(dataFile, [channelGroups.Name '/data']);
-                        timestamps{end+1} = h5read(dataFile, [channelGroups.Name '/timestamps']);
-                        electrodes{end+1} = zeros(length(timestamps{end}),1);
-
-                    end
-
-                end
-
-                spikes.timestamps = [timestamps{:}];
-                spikes.waveforms = [waveforms{:}];
-                spikes.electrodes = [electrodes{:}];
-
-                [~,order] = sort(spikes.timestamps);
-
-                spikes.timestamps = spikes.timestamps(order);
-                
-                spikes.waveforms = spikes.waveforms(:,:,order);
-                %waveforms = permute(spikes.waveforms,[1 3 2]);
-                %spikes.waveforms = reshape(waveforms, [], size(spikes.waveforms,2), 1);
-
-                spikes.electrodes = spikes.electrodes(order);
-
-                self.spikes(num2str(count)) = spikes;
+                self.spikes(streamName) = spikes;
 
             end
+
+
+%             dataFile = fullfile(self.directory, ['experiment' num2str(self.experimentIndex) '.nwb']);
+% 
+%             spikeInfo = h5info(dataFile, ['/acquisition/timeseries/recording' num2str(self.recordingIndex) '/spikes']);
+% 
+%             channelGroups = spikeInfo.Groups;
+% 
+%             names = {};
+%             for i = 1:length(channelGroups)
+%                 names{end+1} = channelGroups(i).Name;
+%             end
+% 
+%             channelCounts = [1 2 4];
+% 
+%             for count = 1:length(channelCounts)
+% 
+%                 spikes = {};
+% 
+%                 timestamps = {};
+%                 waveforms = {};
+%                 electrodes = {};
+% 
+%                 spikes.metadata = {};
+%                 spikes.metadata.names = names; %electrodeData keys
+% 
+%                 if length(channelGroups) > 1
+%                 
+%                     for group = 1:length(channelGroups)
+% 
+%                         channelGroup = channelGroups(group);
+% 
+%                         if channelGroup.Datasets(1).ChunkSize(2) == channelCounts(count)
+% 
+%                             waveforms{end+1} = h5read(dataFile, [channelGroup.Name '/data']);
+%                             timestamps{end+1} = h5read(dataFile, [channelGroup.Name '/timestamps']);
+%                             electrodes{end+1} = zeros(length(timestamps{end}),1);
+% 
+%                         end
+% 
+%                     end
+% 
+%                 else
+% 
+%                     if channelGroups.Datasets(1).ChunkSize(2) == channelCounts(count)
+% 
+%                         waveforms{end+1} = h5read(dataFile, [channelGroups.Name '/data']);
+%                         timestamps{end+1} = h5read(dataFile, [channelGroups.Name '/timestamps']);
+%                         electrodes{end+1} = zeros(length(timestamps{end}),1);
+% 
+%                     end
+% 
+%                 end
+% 
+%                 spikes.timestamps = [timestamps{:}];
+%                 spikes.waveforms = [waveforms{:}];
+%                 spikes.electrodes = [electrodes{:}];
+% 
+%                 [~,order] = sort(spikes.timestamps);
+% 
+%                 spikes.timestamps = spikes.timestamps(order);
+%                 
+%                 spikes.waveforms = spikes.waveforms(:,:,order);
+%                 %waveforms = permute(spikes.waveforms,[1 3 2]);
+%                 %spikes.waveforms = reshape(waveforms, [], size(spikes.waveforms,2), 1);
+% 
+%                 spikes.electrodes = spikes.electrodes(order);
+% 
+%                 self.spikes(num2str(count)) = spikes;
+% 
+%             end
         end
 
     end

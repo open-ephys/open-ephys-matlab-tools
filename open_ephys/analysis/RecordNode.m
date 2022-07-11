@@ -94,11 +94,8 @@ classdef RecordNode < handle
                 self.recordings = BinaryRecording.detectRecordings(self.directory);
             case 'OpenEphys'
                 self.recordings = OpenEphysRecording.detectRecordings(self.directory);
-            case 'KWIK'
-                self.recordings = KwikRecording.detectRecordings(self.directory);
             case 'NWB'
                 self.recordings = NwbRecording.detectRecordings(self.directory);
-
             otherwise
                 disp('A valid format has not been detected!');
             end
