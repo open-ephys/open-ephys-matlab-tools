@@ -304,7 +304,7 @@ classdef OpenEphysRecording < Recording
                 dataSamples = reshape(data.Data, [floor(self.recordSize / 2), numRecords]);
                 
                 %Get mask for current recording
-                validRecords = dataSamples(6,:) == self.recordingIndex-1;
+                validRecords = dataSamples(6,:) == self.recordingIndex - 1;
                 
                 %Isolate valid samples and convert to big endian
                 validSamples = swapbytes(dataSamples(7:end-5,validRecords));
@@ -313,9 +313,11 @@ classdef OpenEphysRecording < Recording
                 samples = validSamples(:);
                 
                 %Generate timestamps
-                timestamps = memmapfile(filename, 'Writable', false, 'Format', 'int64', 'Offset', self.NUM_HEADER_BYTES, 'Repeat', 1);
-                timestamps = timestamps.Data(1):(timestamps.Data(1) + length(samples) - 1);
-                
+                firstRecord = find(validRecords,1,'first');
+                data = memmapfile(filename, 'Writable', false, 'Format', 'int64', 'Offset', self.NUM_HEADER_BYTES + firstRecord*self.recordSize, 'Repeat', 1);
+                startTimestamp = data.Data(1);
+                timestamps = startTimestamp:(startTimestamp + length(samples) - 1);
+
             end
 
         end
