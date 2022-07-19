@@ -335,7 +335,7 @@ classdef OpenEphysRecording < Recording
             
             recordingNumber = data(15,:);
 
-            mask = recordingNumber == recordingIndex;
+            mask = recordingNumber == recordingIndex - 1;
             
             timestamps = timestamps(mask);
             processorId = data(12,mask)';
