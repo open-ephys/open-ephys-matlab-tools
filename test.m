@@ -1,5 +1,5 @@
 % "Import" matlab-tools
-addpath(genpath("."));
+%addpath(genpath("."));
 
 % Define a base path to the recorded data
 dataPath = '/Users/pavelkulik/Documents/Open Ephys';
@@ -18,28 +18,42 @@ for i = 1:nRecordNodes
 
     node = session.recordNodes{i};
 
-    % Get the first recording 
-    recording = node.recordings{1};
+    f = figure(); colors = {'b', 'r'};
+    f.set('Position', [0 0 1800 1000]);
 
-    % Iterate over all data streams in the recording 
-    streamNames = recording.continuous.keys();
-    for j = 1:length(streamNames)
+    for j = 1:length(node.recordings)
 
-        stream = recording.continuous(streamNames{j});
+        % Get the first recording 
+        recording = node.recordings{1,j};
+    
+        % Iterate over all data streams in the recording 
+        streamNames = recording.continuous.keys();
 
-        % Plot the data from the current stream
-        % figure; plot(1:length(stream.samples), stream.samples);
-       
-        % TODO: Get event data
-        event_streams = node.recordings{1,1}.ttlEvents.keys();
-        if length(event_streams) > 0
-            some_stream = event_streams{1};
-            some_events = node.recordings{1,1}.ttlEvents(some_stream);
+        for k = 1:length(streamNames)
+
+            streamName = streamNames{k};
+    
+            % 1. Get the continuous data from the current stream/recording
+            data = recording.continuous(streamName);
+    
+            % 2. Plot the continuous data 
+            plot(data.timestamps, data.samples); hold on;
+           
+            % 3. Overlay any corresponding event data for this stream/recording
+            events = recording.ttlEvents(streamName);
+            if ~isempty(events)
+                for n = 1:length(events.channel)
+                    plot(events.timestamp(n), 1e4, 'r+'); hold on;
+                end
+            end
+
+            % TODO: Spike Data
+            % electrodes = recording.spikes.keys();
+    
         end
+         
 
     end
-     
-    electrodes = session.recordNodes{1,1}.recordings{1,1}.spikes.keys();
     
 end
 
