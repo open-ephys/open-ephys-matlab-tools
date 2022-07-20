@@ -315,7 +315,7 @@ classdef OpenEphysRecording < Recording
                 %Generate timestamps
                 firstRecord = find(validRecords,1,'first');
                 data = memmapfile(filename, 'Writable', false, 'Format', 'int64', 'Offset', self.NUM_HEADER_BYTES + firstRecord*self.recordSize, 'Repeat', 1);
-                startTimestamp = data.Data(1);
+                startTimestamp = data.Data(1) - 1024;
                 timestamps = startTimestamp:(startTimestamp + length(samples) - 1);
 
             end
