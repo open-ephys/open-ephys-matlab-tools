@@ -90,6 +90,7 @@ classdef BinaryRecording < Recording
                 files = regexp(eventDirectories{i},filesep,'split');
 
                 node = regexp(files{length(files)-2},'-','split');
+                processorName = node{1};
                 if length(node) > 2
                     node = { node{1}, strjoin(node((2:length(node))), '-') };
                 end
@@ -101,10 +102,10 @@ classdef BinaryRecording < Recording
                 sampleNumbers = readNPY(fullfile(eventDirectories{i}, 'sample_numbers.npy'));
                 timestamps = readNPY(fullfile(eventDirectories{i}, 'timestamps.npy'));
 
-                id = [num2str(fullId{1}) '.' num2str(fullId{2})];
+                id = [processorName, '-', num2str(fullId{1}) '.' num2str(fullId{2})];
 
                 self.ttlEvents(id) = DataFrame(abs(channels), sampleNumbers, timestamps, processorId*ones(length(channels),1), streamIdx*ones(length(channels),1), channels > 0, ...
-                    'VariableNames', {'line','sample_number','timestamp','processor_id', 'stream_index', 'state'});
+                    'VariableNames', {'channel','sample_number','timestamp','processor_id', 'stream_index', 'state'});
                 
                 streamIdx = streamIdx + 1;
 
