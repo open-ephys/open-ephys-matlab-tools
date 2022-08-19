@@ -55,6 +55,8 @@ classdef Session < handle
 
             self.directory = directory;
 
+            Utils.log("Searching directory: ", directory);
+
             self.recordNodes = {};
             self.detectRecordNodes();
 
@@ -68,6 +70,7 @@ classdef Session < handle
                 self.recordNodes{end+1} = RecordNode(paths{i});
             end
 
+
         end
 
         function show(self)
@@ -75,10 +78,10 @@ classdef Session < handle
             for i = 1:length(self.recordNodes)
 
                 node = self.recordNodes{i};
-                fprintf("(%d) %s : %s Format \n", i, node.name, node.format);
+                fprintf("Found record node: (%d) %s : %s Format \n", i, node.name, node.format);
 
             end
-            
+
         end
 
     end

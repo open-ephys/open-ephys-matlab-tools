@@ -84,6 +84,7 @@ classdef RecordNode < handle
                 error('No supported format was detected!');
             end
 
+            Utils().log("Found recording format:", self.format);
         end
 
         function self = detectRecordings(self)
@@ -99,6 +100,8 @@ classdef RecordNode < handle
             otherwise
                 disp('A valid format has not been detected!');
             end
+
+            Utils().log("Detected", num2str(length(self.recordings)), "recordings.");
 
         end
 

@@ -5,15 +5,12 @@ addpath(genpath("."));
 FIGURE_X_SIZE = 1800;
 FIGURE_Y_SIZE = 1000;
 
-% Define a base path to the recorded data
-dataPath = '/Users/pavelkulik/Documents/Open Ephys';
-dataPath = 'C:\Users\Pavel\OneDrive\Documents\Open Ephys';
+data_path = 'C:\\open-ephys\\data\\2022-08-18_13-42-16';
 
-% Get the path to the most recent recording
-path = fullfile(dataPath, Utils().getLatestRecording(dataPath).name);
+show = true; %whether to plot data or not
 
 % Create a session (loads all data from the most recent recording)
-session = Session(path);
+session = Session(data_path);
 
 % Get the number of record nodes for this session
 nRecordNodes = length(session.recordNodes);
@@ -23,8 +20,10 @@ for i = 1:nRecordNodes
 
     node = session.recordNodes{i};
 
-    f = figure();
-    f.set('Position', [0 0 FIGURE_X_SIZE FIGURE_Y_SIZE]);
+    if show
+        f = figure();
+        f.set('Position', [0 0 FIGURE_X_SIZE FIGURE_Y_SIZE]);
+    end
 
     for j = 1:length(node.recordings)
 
@@ -42,7 +41,7 @@ for i = 1:nRecordNodes
             data = recording.continuous(streamName);
     
             % 2. Plot the continuous data 
-            plot(data.timestamps, data.samples, 'LineWidth', 1.5); hold on;
+            if show plot(data.timestamps, data.samples, 'LineWidth', 1.5); hold on; end
            
             % 3. Overlay all available event data
             eventProcessors = recording.ttlEvents.keys();
@@ -52,7 +51,7 @@ for i = 1:nRecordNodes
                 if ~isempty(events)
                     for n = 1:length(events.channel)
                         if events.state(n) == 1
-                            line([events.timestamp(n), events.timestamp(n)], [-10000,10000], 'Color', 'b', 'LineWidth', 0.2);
+                            if show line([events.timestamp(n), events.timestamp(n)], [-10000,10000], 'Color', 'b', 'LineWidth', 0.2); end
                         end
                     end
                 end
@@ -62,10 +61,9 @@ for i = 1:nRecordNodes
             % electrodes = recording.spikes.keys();
     
         end
-         
 
     end
-    
+
 end
 
 %TODO: Use when processing spikes

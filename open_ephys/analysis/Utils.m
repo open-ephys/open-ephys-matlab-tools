@@ -5,11 +5,19 @@ classdef Utils
     properties
     end
     
-    methods
-        function obj = Utils()
+    methods(Static)
+        function singleton = Utils()
+        end
+
+        function log(varargin)
+            fprintf("[DEBUG] ");
+            for i = 1:length(varargin)
+                fprintf('%s ', varargin{i});
+            end
+            fprintf("\n");
         end
         
-        function latest_recording = getLatestRecording(~, dataPath)
+        function latest_recording = getLatestRecording(dataPath)
             %getLatestRecording Gets the latest recording in the basePath
             %   Returns the path to the latest recording 
             files = dir(dataPath);

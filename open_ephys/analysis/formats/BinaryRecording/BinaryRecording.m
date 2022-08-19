@@ -45,6 +45,8 @@ classdef BinaryRecording < Recording
 
         function self = loadContinuous(self)
 
+            Utils.log("Loading continuous data...");
+
             syncMessages = self.loadSyncMessages();
 
             for i = 1:length(self.info.continuous)
@@ -77,9 +79,13 @@ classdef BinaryRecording < Recording
 
             end
 
+            Utils.log("Finished loading continuous data!");
+
         end
 
         function self = loadEvents(self)
+
+            Utils.log("Loading event data!");
 
             eventDirectories = glob(fullfile(self.directory, 'events', '*', 'TTL*'));
             
@@ -111,6 +117,8 @@ classdef BinaryRecording < Recording
 
             end
 
+            Utils.log("Finished loading event data!");
+
             if length(self.ttlEvents.keys) > 0
                 %TODO: Concatenate data frames?
             end
@@ -118,6 +126,8 @@ classdef BinaryRecording < Recording
         end
 
         function self = loadSpikes(self)
+
+            Utils.log("Loading spike data!");
 
             for i = 1:length(self.info.spikes)
 
@@ -137,9 +147,13 @@ classdef BinaryRecording < Recording
 
             end
 
+            Utils.log("Finished loading spike data!");
+
         end
 
         function syncMessages = loadSyncMessages(self)
+
+            Utils.log("Loading sync messages...");
 
             syncMessages = containers.Map();
 
@@ -175,6 +189,8 @@ classdef BinaryRecording < Recording
 
             end
 
+            Utils.log("Finished loading sync messages!");
+
         end
 
     end
@@ -195,6 +211,8 @@ classdef BinaryRecording < Recording
 
         function recordings = detectRecordings(directory)
 
+            Utils.log("Searching for recordings...");
+
             recordings = {};
 
             experimentDirectories = glob(fullfile(directory, 'experiment*'));
@@ -210,6 +228,8 @@ classdef BinaryRecording < Recording
                 end
 
             end
+
+            Utils.log("Finished searching for recordings!");
             
         end
         
