@@ -174,29 +174,27 @@ classdef BinaryRecording < Recording
             for i = 1:length(rawMessages)-1
 
                 message = strsplit(rawMessages{i});
-                data = strsplit(message{end}, "@");
-                if length(data) == 1
-                    sampleFrequency = '';
+
+                if message{1} == "Software"
+
+                    % Found system time for start of the recording
+                    % "Software Time (milliseconds since midnight Jan 1st 1970 UTC): 1660948389101"
+                    syncMessages("Software") = str2double(message{end});
+
                 else
-                    sampleFrequency = str2num(data{2}(1:end-2)); %Removes trailing 'Hz'
-                end
-                startTimestamp = str2num(data{1});
-                if message{1} == "Software" %found software time
-                    syncMessages("Software") = [startTimestamp];
-                else %extract unique processor id
-                    n = 1; 
-                    while message{n} ~= "for" 
-                        n = n + 1; 
-                    end
-                    m = n;
-                    while message{m}(1) ~= "(" 
-                        m = m + 1; 
-                    end 
-                    processorName = strjoin(message([n+1 m-1]),'_');
-                    processorId = message{m}(2:(end-1));
-                    streamName = message{m+2};
+
+                    % Found a processor string
+                    %(e.g. "Start Time for File Reader (100) - Rhythm Data @ 40000 Hz: 80182")
+
+                    processorName = strjoin(message(4:(find(contains(message,'-'))-2)),'_');
+                    processorId = message{find(contains(message,'-'))-1}(2:(end-1));
+                    streamName = strjoin(message(find(contains(message,'-'))+1:find(contains(message,'@'))-1), ' ');
+                    samplingFreqHz = message{find(contains(message,'@'))+1};
+
                     streamId = strcat(processorName, "-", processorId, ".", streamName);
-                    syncMessages(streamId) = startTimestamp;
+
+                    syncMessages(streamId) = str2double(message{end});
+
                 end
 
             end
