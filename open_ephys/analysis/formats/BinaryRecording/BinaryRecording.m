@@ -53,6 +53,8 @@ classdef BinaryRecording < Recording
 
                 directory = fullfile(self.directory, 'continuous', self.info.continuous(i).folder_name);
 
+                Utils.log("Loading data from directory: ", directory);
+
                 stream = {};
 
                 stream.metadata.sampleRate = self.info.continuous(i).sample_rate;
@@ -65,15 +67,25 @@ classdef BinaryRecording < Recording
                     stream.metadata.names{j} = self.info.continuous(i).channels(j).channel_name;
                 end
 
+                Utils.log("Searching for start timestamp for stream: ");
+                Utils.log("    ", stream.metadata.streamName);
+
                 stream.metadata.id = num2str(stream.metadata.streamName);
 
-                stream.metadata.startTimestamp = syncMessages(stream.metadata.id);
+                Utils.log("Available streams: ");
+
+                availableKeys = keys(syncMessages);
+                for j = 1:length(keys(syncMessages))
+                    Utils.log("    ", availableKeys{j});
+                end
 
                 stream.timestamps = readNPY(fullfile(directory, 'timestamps.npy'));
 
                 data = memmapfile(fullfile(directory, 'continuous.dat'), 'Format', 'int16');
 
                 stream.samples = reshape(data.Data, [stream.metadata.numChannels, length(data.Data) / stream.metadata.numChannels]);
+
+                stream.metadata.startTimestamp = syncMessages(stream.metadata.id);
 
                 self.continuous(stream.metadata.id) = stream;
 

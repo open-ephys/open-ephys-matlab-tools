@@ -5,9 +5,9 @@ addpath(genpath("."));
 FIGURE_X_SIZE = 1800;
 FIGURE_Y_SIZE = 1000;
 
-data_path = 'C:\\open-ephys\\data\\2022-08-18_13-42-16';
+data_path = 'C:\\open-ephys\\data\\001_2022-08-19_15-33-09';
 
-show = true; %whether to plot data or not
+show = false; %whether to plot data or not
 
 % Create a session (loads all data from the most recent recording)
 session = Session(data_path);
