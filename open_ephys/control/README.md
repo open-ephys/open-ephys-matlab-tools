@@ -1,6 +1,6 @@
 # `open_ephys.control`
 
-This module makes it possible to control the [Open Ephys GUI](https://open-ephys.org/gui) via a Python process, either running locally or over a network.
+This module makes it possible to control the [Open Ephys GUI](https://open-ephys.org/gui) via Matlab, either running locally or over a network.
 
 Your GUI's signal chain must include a [NetworkEvents](https://open-ephys.github.io/gui-docs/User-Manual/Plugins/Network-Events.html) plugin in order for this module to work.
 
@@ -9,6 +9,11 @@ To use the control module in Matlab:
 - [Download ZeroMQ](https://zeromq.org/download/) for your specific platform
 - Edit the paths to your zmq library file locations in control/matlab-zmq/config.m
 - Run control/matlab-zmq/make.m to generate the required .mex files
+
+Note: There are known issues when generating mex files for Matlab 2017+. It is possible to generate the mex files with an older version of Matlab and copy them to a newer version of Matlab. 
+
+See this issue for more information:
+https://github.com/fagg/matlab-zmq/issues/40#issuecomment-1030198530 
 
 ## Usage
 
