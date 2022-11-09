@@ -100,7 +100,7 @@ classdef BinaryRecording < Recording
             Utils.log("Loading event data!");
 
             eventDirectories = glob(fullfile(self.directory, 'events', '*', 'TTL*'));
-            
+
             streamIdx = 0;
 
             for i = 1:length(eventDirectories)
@@ -184,16 +184,18 @@ classdef BinaryRecording < Recording
                 else
 
                     % Found a processor string
-                    %(e.g. "Start Time for File Reader (100) - Rhythm Data @ 40000 Hz: 80182")
 
-                    processorName = strjoin(message(4:(find(contains(message,'-'))-2)),'_');
-                    processorId = message{find(contains(message,'-'))-1}(2:(end-1));
-                    streamName = strjoin(message(find(contains(message,'-'))+1:find(contains(message,'@'))-1), ' ');
-                    samplingFreqHz = message{find(contains(message,'@'))+1};
+                    %(e.g. "Start Time for File Reader (100) - Source_Sim-110.0 @ 30000 Hz: 80182")
+                    % Stream name will be: File_Reader-100.Source_Sim-110.0
 
-                    streamId = strcat(processorName, "-", processorId, ".", streamName);
+                    idx = find(strcmp(message, '@'));
+                    node_name = strjoin({strjoin(message(4:(idx-4)),'_'),message{idx-3}(2:end-1)},'-');
 
-                    syncMessages(streamId) = str2double(message{end});
+                    stream_name = message{idx-1};
+
+                    start_timestamp = str2double(message{end});
+
+                    syncMessages(strjoin({node_name, stream_name},'.')) = start_timestamp;
 
                 end
 

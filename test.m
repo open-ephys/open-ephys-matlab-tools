@@ -5,9 +5,11 @@ addpath(genpath("."));
 FIGURE_X_SIZE = 1800;
 FIGURE_Y_SIZE = 1000;
 
-data_path = 'C:\\open-ephys\\data\\001_2022-08-19_15-33-09';
+% Update this path to point to your own recording
+data_path = 'C:/Users/Pavel/OneDrive/Documents/Open Ephys/2022-11-08_17-10-02';
 
-show = false; %whether to plot data or not
+% Show plot
+show = true;
 
 % Create a session (loads all data from the most recent recording)
 session = Session(data_path);
@@ -41,7 +43,7 @@ for i = 1:nRecordNodes
             data = recording.continuous(streamName);
     
             % 2. Plot the continuous data 
-            if show plot(data.timestamps, data.samples, 'LineWidth', 1.5); hold on; end
+            if show, plot(data.timestamps, data.samples, 'LineWidth', 1.5); hold on; end
            
             % 3. Overlay all available event data
             eventProcessors = recording.ttlEvents.keys();
@@ -51,7 +53,7 @@ for i = 1:nRecordNodes
                 if ~isempty(events)
                     for n = 1:length(events.channel)
                         if events.state(n) == 1
-                            if show line([events.timestamp(n), events.timestamp(n)], [-10000,10000], 'Color', 'b', 'LineWidth', 0.2); end
+                            if show, line([events.timestamp(n), events.timestamp(n)], [-10000,10000], 'Color', 'b', 'LineWidth', 0.2); end
                         end
                     end
                 end
