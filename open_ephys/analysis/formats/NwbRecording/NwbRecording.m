@@ -243,16 +243,11 @@ classdef NwbRecording < Recording
 
                 experimentIndex = i;
 
-                streamInfo = h5info(nwbFiles{i}, '/acquisition/');
+                %streamInfo = h5info(nwbFiles{i}, '/acquisition/');
 
-                for j = 1:length(streamInfo.Groups)
+                recordingIndex = 1;
 
-                    recordingIndex = j;
-
-                    recordings{end+1} = NwbRecording(directory, experimentIndex, recordingIndex);
-                    
-                end
-
+                recordings{end+1} = NwbRecording(directory, experimentIndex, recordingIndex);
 
             end
 
