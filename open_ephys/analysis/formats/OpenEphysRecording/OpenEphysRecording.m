@@ -233,7 +233,7 @@ classdef OpenEphysRecording < Recording
             for i = 1:length(f)
 
                 experimentIndex = 1;
-                if length(f{i}) > 4
+                if length(f{i}) > 5
                     experimentIndex = str2double(f{i}{end-1});
                 end
                 if experimentIndex == self.experimentIndex
