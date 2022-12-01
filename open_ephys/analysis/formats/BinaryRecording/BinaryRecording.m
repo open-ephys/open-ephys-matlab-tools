@@ -45,15 +45,11 @@ classdef BinaryRecording < Recording
 
         function self = loadContinuous(self)
 
-            Utils.log("Loading continuous data...");
-
             syncMessages = self.loadSyncMessages();
 
             for i = 1:length(self.info.continuous)
 
                 directory = fullfile(self.directory, 'continuous', self.info.continuous(i).folder_name);
-
-                Utils.log("Loading data from directory: ", directory);
 
                 stream = {};
 
@@ -67,13 +63,12 @@ classdef BinaryRecording < Recording
                     stream.metadata.names{j} = self.info.continuous(i).channels(j).channel_name;
                 end
 
-                Utils.log("Searching for start timestamp for stream: ");
-                Utils.log("    ", stream.metadata.streamName);
+                %Utils.log("Searching for start timestamp for stream: ");
+                %Utils.log("    ", stream.metadata.streamName);
 
                 stream.metadata.id = num2str(stream.metadata.streamName);
 
-                Utils.log("Available streams: ");
-
+                Utils.log("Found streams:");
                 availableKeys = keys(syncMessages);
                 for j = 1:length(keys(syncMessages))
                     Utils.log("    ", availableKeys{j});
@@ -85,19 +80,21 @@ classdef BinaryRecording < Recording
 
                 stream.samples = reshape(data.Data, [stream.metadata.numChannels, length(data.Data) / stream.metadata.numChannels]);
 
-                stream.metadata.startTimestamp = syncMessages(stream.metadata.id);
+                streamKey = stream.metadata.id;
+                
+                % Check for split stream and trim name to match source
+                if (streamKey(end-1) == "-")
+                    streamKey = streamKey(1:end-2);
+                end
+                stream.metadata.startTimestamp = syncMessages(streamKey);
 
                 self.continuous(stream.metadata.id) = stream;
 
             end
 
-            Utils.log("Finished loading continuous data!");
-
         end
 
         function self = loadEvents(self)
-
-            Utils.log("Loading event data!");
 
             eventDirectories = glob(fullfile(self.directory, 'events', '*', 'TTL*'));
 
@@ -129,8 +126,6 @@ classdef BinaryRecording < Recording
 
             end
 
-            Utils.log("Finished loading event data!");
-
             if length(self.ttlEvents.keys) > 0
                 %TODO: Concatenate data frames?
             end
@@ -138,8 +133,6 @@ classdef BinaryRecording < Recording
         end
 
         function self = loadSpikes(self)
-
-            Utils.log("Loading spike data!");
 
             for i = 1:length(self.info.spikes)
 
@@ -151,21 +144,18 @@ classdef BinaryRecording < Recording
 
                 spikes.timestamps = readNPY(fullfile(directory, 'timestamps.npy'));
                 spikes.electrodes = readNPY(fullfile(directory, 'electrode_indices.npy'));
-                spikes.waveforms = readNPY(fullfile(directory, 'waveforms.npy'));
                 spikes.clusters = readNPY(fullfile(directory, 'clusters.npy'));
                 spikes.sample_numbers = readNPY(fullfile(directory, 'sample_numbers.npy'));
+                
+                spikes.waveforms = permute(readNPY(fullfile(directory, 'waveforms.npy')), [3 2 1]);
                 
                 self.spikes(spikes.id) = spikes;  
 
             end
 
-            Utils.log("Finished loading spike data!");
-
         end
 
         function syncMessages = loadSyncMessages(self)
-
-            Utils.log("Loading sync messages...");
 
             syncMessages = containers.Map();
 
@@ -201,8 +191,6 @@ classdef BinaryRecording < Recording
 
             end
 
-            Utils.log("Finished loading sync messages!");
-
         end
 
     end
@@ -223,8 +211,6 @@ classdef BinaryRecording < Recording
 
         function recordings = detectRecordings(directory)
 
-            Utils.log("Searching for recordings...");
-
             recordings = {};
 
             experimentDirectories = glob(fullfile(directory, 'experiment*'));
@@ -240,8 +226,6 @@ classdef BinaryRecording < Recording
                 end
 
             end
-
-            Utils.log("Finished searching for recordings!");
             
         end
         
