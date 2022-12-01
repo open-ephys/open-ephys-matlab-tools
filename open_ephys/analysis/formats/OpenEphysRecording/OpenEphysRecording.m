@@ -108,6 +108,8 @@ classdef OpenEphysRecording < Recording
                         data.name = streamData(i).SPIKECHANNEL(j).nameAttribute;
                         data.bitVolts = streamData(i).SPIKECHANNEL(j).bitVoltsAttribute;
                         data.filename = streamData(i).SPIKECHANNEL(j).filenameAttribute;
+                        data.numChannels = streamData(i).SPIKECHANNEL(j).num_channelsAttribute;
+                        data.numSamples = streamData(i).SPIKECHANNEL(j).num_samplesAttribute;
     
                         stream.spikes{end+1} = data;
     
@@ -179,7 +181,6 @@ classdef OpenEphysRecording < Recording
 
                 s = dir(filename);
                 if s.bytes == 1024
-                    fprintf("Event file at %s does not contain any event data!\n", filename);
                     return
                 end
     
@@ -206,8 +207,12 @@ classdef OpenEphysRecording < Recording
                         [timestamps, waveforms, header] = self.loadSpikeFile(filename, self.recordingIndex);
     
                         spikes = {};
-    
-                        spikes.waveforms = waveforms';
+                        
+                        nChannels = self.streams(streamNames{i}).spikes{j}.numChannels;
+                        nSamples = self.streams(streamNames{i}).spikes{j}.numSamples;
+                        
+                        [r,c] = size(waveforms);
+                        spikes.waveforms = permute(reshape(waveforms, [c, nChannels, nSamples]), [3,2,1]);
                         spikes.timestamps = timestamps;
             
                         self.spikes(header('electrode')) = spikes;
