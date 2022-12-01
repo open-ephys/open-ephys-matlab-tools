@@ -17,7 +17,7 @@ classdef Utils
             fprintf("\n");
         end
         
-        function latest_recording = getLatestRecording(dataPath)
+        function latest_recordings = getLatestRecordings(dataPath, n)
             %getLatestRecording Gets the latest recording in the basePath
             %   Returns the path to the latest recording 
             files = dir(dataPath);
@@ -27,7 +27,7 @@ classdef Utils
             end
             [~,idx] = sort([files.datenum]);
             files = files(idx);
-            latest_recording = files(end);
+            latest_recordings = files(end-n+1:end);
         end
     end
 end
