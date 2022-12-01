@@ -27,7 +27,7 @@ classdef NwbRecording < Recording
         function self = NwbRecording(directory, experimentIndex, recordingIndex) 
             
             self = self@Recording(directory, experimentIndex, recordingIndex);
-            self.format = 'NWB';
+            self.format = 'NWB2';
 
             self.loadContinuous();
             self.loadEvents();
@@ -135,7 +135,7 @@ classdef NwbRecording < Recording
                 spikes = {};
 
                 spikes.timestamps = h5read(dataFile,[spikeInfo.Groups(i).Name '/timestamps']);
-                spikes.data = h5read(dataFile,[spikeInfo.Groups(i).Name '/data']);
+                spikes.waveforms = h5read(dataFile,[spikeInfo.Groups(i).Name '/data']);
                 spikes.electrodes = h5read(dataFile,[spikeInfo.Groups(i).Name '/electrodes']);
                 spikes.conversion = h5read(dataFile,[spikeInfo.Groups(i).Name '/channel_conversion']);
                 spikes.sync = h5read(dataFile,[spikeInfo.Groups(i).Name '/sync']);
