@@ -15,7 +15,7 @@ FIGURE_X_SIZE = SCREEN_X / 2;
 FIGURE_Y_SIZE = SCREEN_Y;
 
 % Update this path to point to your own recording
-% DATA_PATH = 'C:/Users/Pavel/OneDrive/Documents/Open Ephys/';
+DATA_PATH = 'C:/Users/Pavel/OneDrive/Documents/Open Ephys/';
 DATA_PATH = 'C:/open-ephys/0.6.3_smokeTest/';
 
 %Pulls the latest NUM_TESTS recordings by folder datetime 
@@ -113,4 +113,4 @@ for idx = 1:length(RECORDING_FORMATS_TO_TEST)
 end
 
 % Save result 
-exportgraphics(gcf(), "load_all_formats.pdf");
+exportgraphics(gcf(), fullfile("tests", "load_all_formats.pdf"));
