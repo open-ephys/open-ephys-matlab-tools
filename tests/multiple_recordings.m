@@ -1,12 +1,7 @@
 % "Import" matlab-tools
 addpath(genpath("."));
 
-RECORDING_FORMATS_TO_TEST = ["Binary", "NWB2", "Open Ephys"];
-RECORDED_DATA = ["Raw", "BP (300-6k) + Spikes", "BP (1-10) + Events (Peaks)"];
-SAMPLING_RATE = 40000; % samples / sec
-RECORDING_TIME = 4; % seconds
-
-% Define visualization figure
+% Define demo figure size
 set(0,'units','pixels'); 
 s = get(0,'screensize');
 SCREEN_X = s(3);
@@ -14,32 +9,32 @@ SCREEN_Y = s(4);
 FIGURE_X_SIZE = SCREEN_X / 2;
 FIGURE_Y_SIZE = SCREEN_Y;
 
+RECORDING_FORMATS_TO_TEST = ["Binary", "Open Ephys", "NWB2"];
+
 % Update this path to point to your own recording
-% DATA_PATH = 'C:/Users/Pavel/OneDrive/Documents/Open Ephys/';
-DATA_PATH = 'C:/open-ephys/0.6.3_smokeTest/';
-
-%Pulls the latest NUM_TESTS recordings by folder datetime 
-NUM_TESTS = length(RECORDING_FORMATS_TO_TEST);
-latest_recordings = Utils.getLatestRecordings(DATA_PATH,NUM_TESTS);
-
-show = true;
-if show
-    f = figure();
-    f.set('Position', [SCREEN_X / 2 0 FIGURE_X_SIZE FIGURE_Y_SIZE]);
-end
-
-count = 1;
+% data_path = 'C:/Users/Pavel/OneDrive/Documents/Open Ephys/';
+data_path = 'C:/open-ephys/0.6.3_smokeTest/';
+latest_recordings = Utils.getLatestRecordings(data_path,length(RECORDING_FORMATS_TO_TEST));
 
 for idx = 1:length(RECORDING_FORMATS_TO_TEST)
     
     % Define path to the recording
-    rec_path = join([DATA_PATH, latest_recordings(idx).name]);
+    rec_path = join([data_path, latest_recordings(idx).name]);
+
+    % Show plot
+    show = false;
 
     % Create a session (loads all data from the most recent recording)
     session = Session(rec_path);
 
     % Get the number of record nodes for this session
     nRecordNodes = length(session.recordNodes);
+
+    % Generate a figure if plotting is on
+    if show
+        f = figure();
+        f.set('Position', [SCREEN_X / 2 0 FIGURE_X_SIZE FIGURE_Y_SIZE]);
+    end
     
     % Iterate over the record nodes to access data
     for i = 1:nRecordNodes
@@ -54,19 +49,18 @@ for idx = 1:length(RECORDING_FORMATS_TO_TEST)
             % Iterate over all data streams in the recording 
             streamNames = recording.continuous.keys();
 
-            for k = 1:length(streamNames)
+            for k = 1%:length(streamNames)
 
                 streamName = streamNames{k};
-                disp(streamName)
 
                 % 1. Get the continuous data from the current stream/recording
                 data = recording.continuous(streamName);
 
                 % 2. Plot first channel of continuous data 
                 if show 
-                    subplot(length(RECORDING_FORMATS_TO_TEST)*length(RECORDED_DATA),1,count);
+                    subplot(3,1,i); 
                     plot(data.timestamps, data.samples(1,:), 'LineWidth', 1.5);
-                    title(recording.format, RECORDED_DATA(i)); hold on;
+                    title(recording.format); hold on;
                 end
 
                 % 3. Overlay all available event data
@@ -77,7 +71,7 @@ for idx = 1:length(RECORDING_FORMATS_TO_TEST)
                     if ~isempty(events)
                         for n = 1:length(events.channel)
                             if show && events.state(n) == 1
-                                line([events.timestamp(n), events.timestamp(n)], [-4000,2000], 'Color', 'red', 'LineWidth', 0.2);
+                                line([events.timestamp(n), events.timestamp(n)], [-10000,10000], 'Color', 'b', 'LineWidth', 0.2);
                             end
                         end
                     end
@@ -90,20 +84,16 @@ for idx = 1:length(RECORDING_FORMATS_TO_TEST)
                     for e = 1:length(electrodes)
                         % Get all spikes for this electrode
                         spikes = recording.spikes(electrodes{e});
-                        nSpikes = length(spikes.timestamps);
-                        for spike = 1:nSpikes
+                        for spike = 1:length(spikes.timestamps)
                             % Get the timestamps for this spike
                             timestamp = spikes.timestamps(spike);
-                            if show && mod(spike,8) == 0, line([timestamp, timestamp], [-4000,2000], 'Color', 'red', 'LineWidth', 0.2); end
+                            if show, line([timestamp, timestamp], [-10000,10000], 'Color', 'r', 'LineWidth', 0.2); end
                             % Get the waveforms(s) for this spike
                             waveforms = spikes.waveforms(:,:,spike);
                         end
-                        %Utils.log(electrodes{e}, " has ", num2str(nSpikes), " spikes.");
                     end
 
                 end
-
-                count = count + 1;
 
             end
 
@@ -111,6 +101,3 @@ for idx = 1:length(RECORDING_FORMATS_TO_TEST)
     end
     
 end
-
-% Save result 
-exportgraphics(gcf(), "load_all_formats.pdf");

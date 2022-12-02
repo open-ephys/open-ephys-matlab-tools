@@ -68,7 +68,7 @@ classdef BinaryRecording < Recording
 
                 stream.metadata.id = num2str(stream.metadata.streamName);
 
-                Utils.log("Found streams:");
+                %Utils.log("Found streams:");
                 availableKeys = keys(syncMessages);
                 for j = 1:length(keys(syncMessages))
                     Utils.log("    ", availableKeys{j});

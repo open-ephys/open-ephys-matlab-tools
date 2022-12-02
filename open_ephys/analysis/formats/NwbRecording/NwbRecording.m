@@ -27,6 +27,7 @@ classdef NwbRecording < Recording
         function self = NwbRecording(directory, experimentIndex, recordingIndex) 
             
             self = self@Recording(directory, experimentIndex, recordingIndex);
+
             self.format = 'NWB2';
 
             self.loadContinuous();
@@ -45,15 +46,9 @@ classdef NwbRecording < Recording
 
                 groupName = strsplit(streamInfo.Groups(i).Name, '/');
 
-                streamName = groupName{end};
+                type = streamInfo.Groups(i).Attributes(5).Value;
 
-                if strcmp(streamName, 'messages') || strcmp(streamName, 'sync_messages' )
-                    continue;
-                end
-
-                type = strsplit(streamInfo.Groups(i).Name, '.');
-
-                if strcmp(type{end}, 'TTL')
+                if ~strcmp(type, 'ElectricalSeries')
                     continue;
                 end
                  
@@ -68,9 +63,6 @@ classdef NwbRecording < Recording
                 stream.metadata.electrodes = h5read(dataFile, [streamInfo.Groups(i).Name '/electrodes']);
                 stream.metadata.conversion = h5read(dataFile, [streamInfo.Groups(i).Name '/channel_conversion']);
                 stream.metadata.sync = h5read(dataFile, [streamInfo.Groups(i).Name '/sync']);
-
-                %name = strsplit(streamInfo.Groups(i).Name, '_'); 
-                %processorId = name{end};
 
                 self.continuous(stream.name) = stream;
 
@@ -90,14 +82,15 @@ classdef NwbRecording < Recording
 
                 streamName = groupName{end};
 
-                type = strsplit(streamName, '.');
+                type = streamInfo.Groups(i).Attributes(5).Value;
 
-                if ~strcmp(type{end}, 'TTL')
+                if ~strcmp(type, 'TimeSeries')
                     continue;
                 end
 
                 eventInfo = streamInfo;
 
+                type = strsplit(streamName, '.');
                 nodeId = strsplit(type{1},'-'); nodeId = nodeId{end};
 
                 timestamps = h5read(dataFile,[eventInfo.Groups(i).Name '/timestamps']);
@@ -124,7 +117,8 @@ classdef NwbRecording < Recording
 
                 streamName = groupName{end};
 
-                if ~strcmp(streamInfo.Groups(i).Attributes(5).Value, 'SpikeEventSeries')
+                type = streamInfo.Groups(i).Attributes(5).Value;
+                if ~strcmp(type, 'SpikeEventSeries')
                     continue;
                 end
 

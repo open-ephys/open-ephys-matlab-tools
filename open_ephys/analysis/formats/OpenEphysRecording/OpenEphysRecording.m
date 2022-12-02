@@ -198,23 +198,25 @@ classdef OpenEphysRecording < Recording
 
             for i = 1:length(streamNames)
 
-                if isfield(self.streams(streamNames{i}), 'spikes')
+                stream = self.streams(streamNames{i});
 
-                    for j = 1:length(self.streams(streamNames{i}).spikes)
+                if isfield(stream, 'spikes')
 
-                        filename = fullfile(self.directory, self.streams(streamNames{i}).spikes{j}.filename);
+                    for j = 1:length(stream.spikes)
+
+                        filename = fullfile(self.directory, stream.spikes{j}.filename);
 
                         [timestamps, waveforms, header] = self.loadSpikeFile(filename, self.recordingIndex);
     
                         spikes = {};
                         
-                        nChannels = self.streams(streamNames{i}).spikes{j}.numChannels;
-                        nSamples = self.streams(streamNames{i}).spikes{j}.numSamples;
+                        nChannels = stream.spikes{j}.numChannels;
+                        nSamples = stream.spikes{j}.numSamples;
                         
-                        [r,c] = size(waveforms);
+                        [~,c] = size(waveforms);
                         spikes.waveforms = permute(reshape(waveforms, [c, nChannels, nSamples]), [3,2,1]);
                         spikes.timestamps = timestamps;
-            
+
                         self.spikes(header('electrode')) = spikes;
     
                     end
