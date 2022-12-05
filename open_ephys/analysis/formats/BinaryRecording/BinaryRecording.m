@@ -40,6 +40,8 @@ classdef BinaryRecording < Recording
             self = self.loadContinuous();
             self = self.loadEvents();
             self = self.loadSpikes();
+            
+            self = self.loadMessages();
 
         end
 
@@ -96,16 +98,16 @@ classdef BinaryRecording < Recording
 
         function self = loadEvents(self)
 
-            eventDirectories = glob(fullfile(self.directory, 'events', '*', 'TTL*'));
+            ttlDirectories = glob(fullfile(self.directory, 'events', '*', 'TTL*'));
 
             streamIdx = 0;
 
-            for i = 1:length(eventDirectories)
+            for i = 1:length(ttlDirectories)
 
-                files = regexp(eventDirectories{i},filesep,'split');
+                files = regexp(ttlDirectories{i},filesep,'split');
 
                 node = regexp(files{length(files)-2},'-','split');
-                processorName = node{1};
+                processorName = node{1}
                 if length(node) > 2
                     node = { node{1}, strjoin(node((2:length(node))), '-') };
                 end
@@ -113,9 +115,9 @@ classdef BinaryRecording < Recording
                 processorId = str2num(fullId{1});
                 subprocessorId = str2num(fullId{2});
                 
-                channels = readNPY(fullfile(eventDirectories{i}, 'states.npy'));
-                sampleNumbers = readNPY(fullfile(eventDirectories{i}, 'sample_numbers.npy'));
-                timestamps = readNPY(fullfile(eventDirectories{i}, 'timestamps.npy'));
+                channels = readNPY(fullfile(ttlDirectories{i}, 'states.npy'));
+                sampleNumbers = readNPY(fullfile(ttlDirectories{i}, 'sample_numbers.npy'));
+                timestamps = readNPY(fullfile(ttlDirectories{i}, 'timestamps.npy'));
 
                 id = [processorName, '-', num2str(fullId{1}) '.' num2str(fullId{2})];
 
@@ -131,6 +133,29 @@ classdef BinaryRecording < Recording
             end
 
         end
+        
+        function self = loadMessages(self)
+            
+            msgDirectory = glob(fullfile(self.directory, 'events', 'MessageCenter'));
+
+            messages = fullfile(msgDirectory, 'text.npy');
+            messages = dir(messages{:});
+
+            if messages.bytes > 128
+
+                Utils.log("Found message events");
+
+                text = readNPY(fullfile(msgDirectory{1}, 'text.npy'));
+                sampleNumbers = readNPY(fullfile(msgDirectory{1}, 'sample_numbers.npy'));
+                timestamps = readNPY(fullfile(msgDirectory{1}, 'timestamps.npy'));
+
+                self.messages('MessageCenter') = DataFrame(timestamps, sampleNumbers, text, ...
+                    'VariableNames', {'timestamps','sample_number','text'})
+
+            end
+            
+        end
+        
 
         function self = loadSpikes(self)
 

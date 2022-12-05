@@ -17,9 +17,24 @@ function data = readNPY(filename)
     try
     
         [~] = fread(fid, totalHeaderLength, 'uint8');
-    
+
         % read the data
-        data = fread(fid, prod(shape), [dataType '=>' dataType]);
+        if strcmp(dataType, 'string') %Assume 513 bytes 
+            % add support for different message lengths as needed 
+            stringLength = 513; 
+
+            rawData = fread(fid, 'int8');
+
+            data = strings(length(rawData) / stringLength,1);
+
+            for n = 1:length(data)
+                text = char(nonzeros(rawData(((n-1)*stringLength+1):n*stringLength)));
+                data(n) = string(text(:)');
+            end
+            
+        else
+            data = fread(fid, prod(shape), [dataType '=>' dataType]);
+        end
     
         if length(shape)>1 && ~fortranOrder
             data = reshape(data, shape(end:-1:1));

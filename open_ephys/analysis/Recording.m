@@ -67,6 +67,8 @@ classdef (Abstract) Recording < handle
         ttlEvents
         spikes
 
+        messages
+
         syncLines
 
     end
@@ -82,6 +84,8 @@ classdef (Abstract) Recording < handle
             self.continuous = containers.Map();
             self.ttlEvents = containers.Map();
             self.spikes = containers.Map();
+
+            self.messages = containers.Map();
 
             self.syncLines = {};
 

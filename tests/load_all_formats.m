@@ -1,31 +1,34 @@
 % "Import" matlab-tools
 addpath(genpath("."));
 
+% Test parameters used (either manually or via python-tools script)
 RECORDING_FORMATS_TO_TEST = ["Binary", "NWB2", "Open Ephys"];
 RECORDED_DATA = ["Raw", "BP (300-6k) + Spikes", "BP (1-10) + Events (Peaks)"];
 SAMPLING_RATE = 40000; % samples / sec
 RECORDING_TIME = 4; % seconds
 
-% Define visualization figure
-set(0,'units','pixels'); 
-s = get(0,'screensize');
-SCREEN_X = s(3);
-SCREEN_Y = s(4);
-FIGURE_X_SIZE = SCREEN_X / 2;
-FIGURE_Y_SIZE = SCREEN_Y;
-
 % Update this path to point to your own recording
 DATA_PATH = 'C:/Users/Pavel/OneDrive/Documents/Open Ephys/';
-DATA_PATH = 'C:/open-ephys/0.6.3_smokeTest/';
+%DATA_PATH = 'C:/open-ephys/0.6.3_smokeTest/';
 
-%Pulls the latest NUM_TESTS recordings by folder datetime 
+% Pulls the latest NUM_TESTS recordings by folder datetime 
 NUM_TESTS = length(RECORDING_FORMATS_TO_TEST);
 latest_recordings = Utils.getLatestRecordings(DATA_PATH,NUM_TESTS);
 
-show = true;
+% Flag to plot data after test 
+show = false;
 if show
+    % Define visualization figure
+    set(0,'units','pixels'); 
+    s = get(0,'screensize');
+    SCREEN_X = s(3);
+    SCREEN_Y = s(4);
+    FIGURE_X_SIZE = SCREEN_X / 2;
+    FIGURE_Y_SIZE = SCREEN_Y;
+
+    set(0,'DefaultFigureWindowStyle','docked');
     f = figure();
-    f.set('Position', [SCREEN_X / 2 0 FIGURE_X_SIZE FIGURE_Y_SIZE]);
+    %f.set('Position', [SCREEN_X / 2 0 FIGURE_X_SIZE FIGURE_Y_SIZE]);
 end
 
 count = 1;

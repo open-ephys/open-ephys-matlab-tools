@@ -20,8 +20,8 @@ function [arrayShape, dataType, fortranOrder, littleEndian, totalHeaderLength, n
     
     try
         
-        dtypesMatlab = {'uint8','uint16','uint32','uint64','int8','int16','int32','int64','single','double', 'logical'};
-        dtypesNPY = {'u1', 'u2', 'u4', 'u8', 'i1', 'i2', 'i4', 'i8', 'f4', 'f8', 'b1'};
+        dtypesMatlab = {'uint8','uint16','uint32','uint64','int8','int16','int32','int64','single','double', 'logical', 'string', };
+        dtypesNPY = {'u1', 'u2', 'u4', 'u8', 'i1', 'i2', 'i4', 'i8', 'f4', 'f8', 'b1', 'S513'};
         
         
         magicString = fread(fid, [1 6], 'uint8=>uint8');
@@ -49,7 +49,7 @@ function [arrayShape, dataType, fortranOrder, littleEndian, totalHeaderLength, n
         
         littleEndian = ~strcmp(dtNPY(1), '>');
         
-        dataType = dtypesMatlab{strcmp(dtNPY(2:3), dtypesNPY)};
+        dataType = dtypesMatlab{strcmp(dtNPY(2:end), dtypesNPY)};
             
         r = regexp(arrayFormat, '''fortran_order''\s*:\s*(\w+)', 'tokens');
         fortranOrder = strcmp(r{1}{1}, 'True');
