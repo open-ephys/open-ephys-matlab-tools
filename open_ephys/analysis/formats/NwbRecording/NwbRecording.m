@@ -33,6 +33,8 @@ classdef NwbRecording < Recording
             self.loadContinuous();
             self.loadEvents();
             self.loadSpikes();
+            
+            self.loadMessages();
 
         end
 
@@ -69,6 +71,32 @@ classdef NwbRecording < Recording
             end
 
         end
+        
+        function self = loadMessages(self)
+            
+            dataFile = fullfile(self.directory, ['experiment' num2str(self.experimentIndex) '.nwb']);
+
+            streamInfo = h5info(dataFile, '/acquisition');
+            
+            for i = 1:length(streamInfo.Groups)
+
+                groupName = strsplit(streamInfo.Groups(i).Name, '/');
+
+                if ~strcmp(groupName{end}, 'messages')
+                    continue;
+                end
+
+                timestamps = h5read(dataFile,[streamInfo.Groups(i).Name '/timestamps']);
+                text = h5read(dataFile,[streamInfo.Groups(i).Name '/data']);
+                sampleNumbers = h5read(dataFile,[streamInfo.Groups(i).Name '/sync']);
+            
+                self.messages('MessageCenter') = DataFrame(timestamps, sampleNumbers, text, ...
+                    'VariableNames', {'timestamps','sample_number','text'});
+
+            end
+            
+        end
+        
 
         function self = loadEvents(self)
 
