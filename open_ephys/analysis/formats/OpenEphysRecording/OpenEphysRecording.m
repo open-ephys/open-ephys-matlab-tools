@@ -61,7 +61,9 @@ classdef OpenEphysRecording < Recording
             self = self.loadContinuous();
             self = self.loadEvents();
             self = self.loadSpikes();
-
+            
+            self = self.loadMessages();
+           
         end
 
         function self = loadStructure(self)
@@ -190,6 +192,17 @@ classdef OpenEphysRecording < Recording
 
             end 
 
+        end
+        
+        function self = loadMessages(self)
+            
+            filename = fullfile(self.directory, "messages.events");
+            
+            [timestamps, messages] = self.loadMessageFile(filename);
+            
+            self.messages('MessageCenter') = DataFrame(timestamps, messages, ...
+                    'VariableNames', {'timestamps','text'});
+            
         end
 
         function self = loadSpikes(self)
@@ -391,6 +404,32 @@ classdef OpenEphysRecording < Recording
             %waveforms = waveforms / 20000;
             %waveforms = waveforms * 1000;
 
+        end
+        
+        function [timestamps, messages] = loadMessageFile(self, filename)
+            
+            timestamps = [];
+            messages = {};
+            
+            recordingIdx = 0;
+            
+            fid = fopen(filename);
+            textLine = fgetl(fid);
+            while ischar(textLine)
+                if contains(textLine, 'Software')
+                    recordingIdx = recordingIdx + 1;
+                end
+                if recordingIdx == self.recordingIndex
+                    data = split(textLine, ",");
+                    timestamps(end+1,1) = str2double(data(1));
+                    messages{end+1,1} = char(data(2));
+                elseif recordingIdx > self.recordingIndex
+                    break;
+                end
+                textLine = fgetl(fid);
+            end
+            fclose(fid);
+            
         end
 
         function numRecords = getNumRecords(self, filename)
