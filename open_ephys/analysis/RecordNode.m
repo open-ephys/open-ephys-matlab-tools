@@ -101,7 +101,7 @@ classdef RecordNode < handle
                 disp('A valid format has not been detected!');
             end
 
-            Utils().log("Detected", num2str(length(self.recordings)), "recordings.");
+            Utils().log("Detected", num2str(length(self.recordings)), "recordings");
 
         end
 
