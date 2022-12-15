@@ -70,13 +70,15 @@ classdef BinaryRecording < Recording
 
                 stream.metadata.id = num2str(stream.metadata.streamName);
 
-                %Utils.log("Found streams:");
-                availableKeys = keys(syncMessages);
-                for j = 1:length(keys(syncMessages))
-                    Utils.log("    ", availableKeys{j});
-                end
+                % Utils.log("Found streams:");
+                % availableKeys = keys(syncMessages);
+                % for j = 1:length(keys(syncMessages))
+                %     Utils.log("    ", availableKeys{j});
+                % end
 
                 stream.timestamps = readNPY(fullfile(directory, 'timestamps.npy'));
+
+                stream.sampleNumbers = readNPY(fullfile(directory, 'sample_numbers.npy'));
 
                 data = memmapfile(fullfile(directory, 'continuous.dat'), 'Format', 'int16');
 
@@ -107,7 +109,7 @@ classdef BinaryRecording < Recording
                 files = regexp(ttlDirectories{i},filesep,'split');
 
                 node = regexp(files{length(files)-2},'-','split');
-                processorName = node{1}
+                processorName = node{1};
                 if length(node) > 2
                     node = { node{1}, strjoin(node((2:length(node))), '-') };
                 end
@@ -115,14 +117,14 @@ classdef BinaryRecording < Recording
                 processorId = str2num(fullId{1});
                 subprocessorId = str2num(fullId{2});
                 
-                channels = readNPY(fullfile(ttlDirectories{i}, 'states.npy'));
+                lines = readNPY(fullfile(ttlDirectories{i}, 'states.npy'));
                 sampleNumbers = readNPY(fullfile(ttlDirectories{i}, 'sample_numbers.npy'));
                 timestamps = readNPY(fullfile(ttlDirectories{i}, 'timestamps.npy'));
 
                 id = [processorName, '-', num2str(fullId{1}) '.' num2str(fullId{2})];
 
-                self.ttlEvents(id) = DataFrame(abs(channels), sampleNumbers, timestamps, processorId*ones(length(channels),1), streamIdx*ones(length(channels),1), channels > 0, ...
-                    'VariableNames', {'channel','sample_number','timestamp','processor_id', 'stream_index', 'state'});
+                self.ttlEvents(id) = DataFrame(abs(lines), sampleNumbers, timestamps, processorId*ones(length(lines),1), streamIdx*ones(length(lines),1), lines > 0, ...
+                    'VariableNames', {'line','sample_number','timestamp','processor_id', 'stream_index', 'state'});
                 
                 streamIdx = streamIdx + 1;
 
@@ -143,14 +145,14 @@ classdef BinaryRecording < Recording
 
             if messages.bytes > 128
 
-                Utils.log("Found message events");
+                % Utils.log("Found message events");
 
                 text = readNPY(fullfile(msgDirectory{1}, 'text.npy'));
                 sampleNumbers = readNPY(fullfile(msgDirectory{1}, 'sample_numbers.npy'));
                 timestamps = readNPY(fullfile(msgDirectory{1}, 'timestamps.npy'));
 
                 self.messages('MessageCenter') = DataFrame(timestamps, sampleNumbers, text, ...
-                    'VariableNames', {'timestamps','sample_number','text'})
+                    'VariableNames', {'timestamps','sample_number','text'});
 
             end
             

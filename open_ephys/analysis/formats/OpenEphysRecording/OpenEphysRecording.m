@@ -135,17 +135,35 @@ classdef OpenEphysRecording < Recording
 
             for i = 1:length(streamNames)
 
+                currentStream = streamNames{i};
+
                 % Find all continuous files belonging to this stream
                 streamFiles = {};
                 for j = 1:length(files)
-                    if contains(files{j}, streamNames{i})
-                        streamName = split(streamNames{i}, '_');
+                    if contains(files{j}, currentStream)
+                        streamName = split(currentStream, '_');
                         processorId = streamName{1};
                         streamFiles{end+1} = files{j};
                     end
                 end
                 
-                [timestamps, ~, ~] = self.loadContinuousFile(streamFiles{1});
+                filename = streamFiles{1};
+
+                [sampleNumbers, ~, ~, validRecords] = self.loadContinuousFile(streamFiles{1});
+
+                filename = fullfile(self.directory, strcat(currentStream, ".timestamps"));
+
+                data = memmapfile(filename, 'Writable', false, 'Offset', 0, 'Format', 'double');
+
+                data = data.Data(validRecords);
+
+                data = [data; 2*data(end) - data(end-1)];
+
+                timestamps = zeros(1,1024*(length(data)-1));
+
+                for j = 1:length(data)-1
+                    timestamps(((j-1)*1024+1):(j*1024)) = linspace(data(j),data(j+1),1024);
+                end
 
                 stream = {};
 
@@ -156,8 +174,9 @@ classdef OpenEphysRecording < Recording
                 stream.metadata.startTimestamp = timestamps(1);
 
                 stream.timestamps = timestamps;
+                stream.sampleNumbers = sampleNumbers;
 
-                stream.samples = zeros(length(streamFiles), length(timestamps));
+                stream.samples = zeros(length(streamFiles), length(sampleNumbers));
 
                 for j = 1:length(streamFiles)
             
@@ -186,9 +205,14 @@ classdef OpenEphysRecording < Recording
                     return
                 end
     
-                [timestamps, processorId, state, channel, header] = self.loadEventsFile(filename, self.recordingIndex);
+                [sampleNumbers, processorId, state, line, ~] = self.loadEventsFile(filename, self.recordingIndex);
+
+                index = find(ismember(self.continuous(streamNames{i}).sampleNumbers, sampleNumbers));
+
+                timestamps = self.continuous(streamNames{i}).timestamps(index);
     
-                self.ttlEvents(streamNames{i}) = DataFrame(channel + 1, timestamps, processorId, state, 'VariableNames', {'channel','timestamp','nodeID','state'});
+                self.ttlEvents(streamNames{i}) = DataFrame(line + 1, sampleNumbers, timestamps', processorId, state, ...
+                    'VariableNames', {'line','sampleNumber','timestamp','nodeID','state'});
 
             end 
 
@@ -219,7 +243,7 @@ classdef OpenEphysRecording < Recording
 
                         filename = fullfile(self.directory, stream.spikes{j}.filename);
 
-                        [timestamps, waveforms, header] = self.loadSpikeFile(filename, self.recordingIndex);
+                        [sampleNumbers, waveforms, header] = self.loadSpikeFile(filename, self.recordingIndex);
     
                         spikes = {};
                         
@@ -228,6 +252,13 @@ classdef OpenEphysRecording < Recording
                         
                         [~,c] = size(waveforms);
                         spikes.waveforms = permute(reshape(waveforms, [c, nChannels, nSamples]), [3,2,1]);
+
+                        spikes.sampleNumbers = sampleNumbers;
+
+                        index = find(ismember(self.continuous(streamNames{i}).sampleNumbers, sampleNumbers));
+
+                        timestamps = self.continuous(streamNames{i}).timestamps(index);
+
                         spikes.timestamps = timestamps;
 
                         self.spikes(header('electrode')) = spikes;
@@ -280,7 +311,7 @@ classdef OpenEphysRecording < Recording
 
         end
 
-        function [timestamps, samples, header] = loadContinuousFile(self, filename)
+        function [sampleNumbers, samples, header, validRecords] = loadContinuousFile(self, filename)
             
             header = self.readHeader(filename);
             numRecords = self.getNumRecords(filename);
@@ -295,7 +326,7 @@ classdef OpenEphysRecording < Recording
                 fid = fopen(filename);
                 fread(fid, self.NUM_HEADER_BYTES, 'char*1'); %header
 
-                timestamps = [];
+                sampleNumbers = [];
                 samples = [];
 
                 for i = 1:numRecords
@@ -305,7 +336,7 @@ classdef OpenEphysRecording < Recording
                     recordingNumber = fread(fid, 1, 'uint16', 0, 'l');
                     if recordingNumber == self.recordingIndex
                         samples = [samples; fread(fid, N, 'int16',0,'b')]; %big-endian
-                        timestamps = [timestamps, timestamp:(timestamp + N - 1)];
+                        sampleNumbers = [sampleNumbers, timestamp:(timestamp + N - 1)];
                     elseif recordingNumber > self.recordingIndex
                         break;
                     end
@@ -335,8 +366,8 @@ classdef OpenEphysRecording < Recording
                 %Generate timestamps
                 firstRecord = find(validRecords,1,'first');
                 data = memmapfile(filename, 'Writable', false, 'Format', 'int64', 'Offset', self.NUM_HEADER_BYTES + firstRecord*self.recordSize, 'Repeat', 1);
-                startTimestamp = data.Data(1) - 1024;
-                timestamps = startTimestamp:(startTimestamp + length(samples) - 1);
+                startSampleNumber = data.Data(1) - 1024;
+                sampleNumbers = startSampleNumber:(startSampleNumber + length(samples) - 1);
 
             end
 
@@ -364,7 +395,7 @@ classdef OpenEphysRecording < Recording
 
         end
         
-        function [timestamps, waveforms, header] = loadSpikeFile(self, filename, recordingNumber)
+        function [sampleNumbers, waveforms, header] = loadSpikeFile(self, filename, recordingNumber)
 
             header = self.readHeader(filename);
 
@@ -381,13 +412,13 @@ classdef OpenEphysRecording < Recording
             s = dir(filename);
             numSpikes = floor(( s.bytes - self.NUM_HEADER_BYTES ) / SPIKE_RECORD_SIZE);
 
-            timestamps = zeros(numSpikes,1);
+            sampleNumbers = zeros(numSpikes,1);
 
             fid = fopen(filename);
             fread(fid, self.NUM_HEADER_BYTES+1, 'char*1');
 
-            for i  = 1:length(timestamps)
-                timestamps(i) = fread(fid, 1, 'int64');
+            for i  = 1:length(sampleNumbers)
+                sampleNumbers(i) = fread(fid, 1, 'int64');
                 fseek(fid, self.NUM_HEADER_BYTES + 1 + SPIKE_RECORD_SIZE * i, -1);
             end
 
@@ -396,7 +427,7 @@ classdef OpenEphysRecording < Recording
 
             mask = data(end,:) == recordingNumber - 1;
 
-            timestamps = timestamps(mask==1);
+            sampleNumbers = sampleNumbers(mask==1);
 
             [r,~] = size(data);
             waveforms = single(data(22:(r - floor(POST_BYTES/2)), mask==1));

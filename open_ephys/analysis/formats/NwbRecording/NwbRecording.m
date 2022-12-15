@@ -58,13 +58,13 @@ classdef NwbRecording < Recording
 
                 stream.samples = h5read(dataFile, [streamInfo.Groups(i).Name '/data']);
                 stream.timestamps = h5read(dataFile, [streamInfo.Groups(i).Name '/timestamps']);
+                stream.sampleNumbers = h5read(dataFile, [streamInfo.Groups(i).Name '/sync']);
 
                 stream.metadata = {};
 
                 stream.metadata.startTimestamp = stream.timestamps(1);
                 stream.metadata.electrodes = h5read(dataFile, [streamInfo.Groups(i).Name '/electrodes']);
                 stream.metadata.conversion = h5read(dataFile, [streamInfo.Groups(i).Name '/channel_conversion']);
-                stream.metadata.sync = h5read(dataFile, [streamInfo.Groups(i).Name '/sync']);
 
                 self.continuous(stream.name) = stream;
 
@@ -127,7 +127,7 @@ classdef NwbRecording < Recording
                 fullWord = h5read(dataFile,[eventInfo.Groups(i).Name '/full_word']);
             
                 self.ttlEvents(streamName) = DataFrame(str2double(nodeId)*ones(length(timestamps),1), sampleNumbers, timestamps, abs(data), data > 0, ...
-                    'VariableNames', {'nodeId', 'sample_number', 'timestamp','channel','state'});
+                    'VariableNames', {'nodeId', 'sample_number', 'timestamp','line','state'});
 
             end
 
