@@ -91,44 +91,55 @@ classdef (Abstract) Recording < handle
 
         end
 
-        function self = addSyncChannel(self, channel, processorId, subprocessorId, main)
+        function self = addSyncLine(self, line, processorId, streamIdx, streamName, isMain)
 
             % Specifies an event channel to use for timestamp synchronization. Each
             % sync channel in a recording should receive its input from the same
             % physical digital input line.
 
-            % For synchronization to work, there must be one (and only one) 'main'
+            % For synchronization to work, there must be one (and only one) main
             % sync channel, to which all timestamps will be aligned.
 
             % Parameters
             % ----------
-            % channel : int
+            % line : int
             %     event channel number
             % processorId : int
             %     ID for the processor receiving sync events
-            % subprocessorId : int
+            % streamIdx : int
             %     index of the subprocessor receiving sync events
             %     default = 0
             % main : bool
-            %     if True, this processor's timestamps will be treated as the
-            %     main clock
+            %     if True, this processors timestamps will be treated as the main clock
 
-            if main
-                %TODO: Check for existing main
+            if isMain
+                %TODO: Check for existing main and either overwrite or show
+                %warning
             end
 
             syncChannel = {};
-            syncChannel.channel = channel;
+            syncChannel.line = line;
             syncChannel.processorId = processorId;
-            syncChannel.subprocessorId = subprocessorId;
-            syncChannel.main = main;
+            syncChannel.streamIdx = streamIdx;
+            syncChannel.isMain = isMain;
+            syncChannel.streamName = streamName;
+
+            streams = self.continuous.keys();
+
+            for i = 1:length(streams)
+                stream = self.continuous(streams{i});
+                if strcmp(stream.metadata.streamName, syncChannel.streamName)
+                    syncChannel.sampleRate = stream.metadata.sampleRate;
+                    Utils.log("Setting sync channel ", num2str(i), " to ", stream.metadata.streamName, " @ ", num2str(stream.metadata.sampleRate));
+                end
+            end
 
             for i = 1:length(self.syncLines)
 
-                if self.syncLines{i}.processorId == processorId && self.syncLines{i}.subprocessorId == subprocessorId
+                if self.syncLines{i}.processorId == processorId && self.syncLines{i}.streamIdx == streamIdx
 
-                    fprintf("Found existing sync line, overwriting with new line!\n");
-                    self.syncLines{i} = syncChannel;
+                    Utils.log("Found existing sync line, overwriting with new line!");
+                    self.syncLines{streamIdx} = syncChannel;
                     break;
 
                 end
@@ -151,26 +162,31 @@ classdef (Abstract) Recording < handle
             % the global timestamps for all processors with a shared sync line
 
             if isempty(self.syncLines)
-                fprintf("At least two sync channels must be specified using 'addSyncChannel' before global timestamps can be computed\n");
+                Utils.log("At least two sync channels must be specified using 'addSyncChannel' before global timestamps can be computed");
                 return;
             end
 
             % Identify main sync line
             mainIdx = 0;
             for i = 1:length(self.syncLines)
-                if self.syncLines{i}.main
+                if self.syncLines{i}.isMain
                     main = self.syncLines{i};
                     mainIdx = i;
                     break;
                 end
             end
 
-            if ~mainIdx || length(self.syncLines) < 2
-                fprintf("Computing global timestamps requires one main sync channel and at least one auxiliary sync channel!\n");
+            if length(self.syncLines) < 2
+                Utils.log("Computing global timestamps requires at least two auxiliary sync channels!");
                 return;
+            elseif mainIdx == 0
+                Utils.log("No main line designated by user, assuming first available sync is main...");
+                mainIdx = 1;
+                main = self.syncLines{mainIdx};
             end
 
-            mainEvents = 0;
+            Utils.log("Found main stream: ", num2str(mainIdx));
+
             eventProcessors = self.ttlEvents.keys;
 
             % Get events for main sync line
@@ -178,13 +194,11 @@ classdef (Abstract) Recording < handle
 
                 events = self.ttlEvents(eventProcessors{i});
 
-                if events.channel(1) == main.channel && ...
-                        events.processorId(1) == main.processorId && ...
-                        events.subprocessorId(1) == main.subprocessorId % && events.state(1) == 1
+                if events.line(1) == main.line && ...
+                        strcmp(eventProcessors{i}, main.streamName)
 
-                    mainEvents = events;
-                    mainStartSample = events.timestamp(1);
-                    mainTotalSamples = events.timestamp(end) - mainStartSample;
+                    mainStartSample = events.sample_number(1);
+                    mainTotalSamples = events.sample_number(end) - mainStartSample;
 
                 end
 
@@ -195,38 +209,23 @@ classdef (Abstract) Recording < handle
             self.syncLines{mainIdx}.scaling = 1;
             self.syncLines{mainIdx}.offset = mainStartSample;
 
-            % Get main sync line sample rate from continuous stream
-            continuousProcessors = self.continuous.keys;
-            for i = 1:length(continuousProcessors)
-
-                stream = self.continuous(continuousProcessors{i});
-                if stream.metadata.processorId == main.processorId && stream.metadata.subprocessorId == main.subprocessorId
-                    self.syncLines{mainIdx}.sampleRate = stream.metadata.sampleRate;
-                    break;
-                end
-
-            end
-
             % Update sync parameters for auxiliary lines
             for i = 1:length(self.syncLines)
 
                 if ~(i == mainIdx)
 
-                    eventProcessors = self.ttlEvents.keys;
-
                     for j = 1:length(eventProcessors)
 
                         events = self.ttlEvents(eventProcessors{j});
 
-                        if events.channel(1) == self.syncLines{i}.channel && ...
-                            events.processorId(1) == self.syncLines{i}.processorId && ...
-                            events.subprocessorId(1) == self.syncLines{i}.subprocessorId % && events.state(1) == 1
+                        if events.line(1) == self.syncLines{i}.line && ...
+                            events.processor_id(1) == self.syncLines{i}.processorId && ...
+                            events.stream_index(1) == self.syncLines{i}.streamIdx
 
-                            auxStartSample = events.timestamp(1);
-                            auxTotalSamples = events.timestamp(end) - auxStartSample;
-
+                            auxStartSample = events.sample_number(1);
+                            auxTotalSamples = events.sample_number(end) - auxStartSample;
                             self.syncLines{i}.start = auxStartSample;
-                            self.syncLines{i}.scaling = mainTotalSamples / auxTotalSamples;
+                            self.syncLines{i}.scaling = double(mainTotalSamples) / double(auxTotalSamples);
                             self.syncLines{i}.offset = mainStartSample;
                             self.syncLines{i}.sampleRate = self.syncLines{mainIdx}.sampleRate;
 
@@ -249,14 +248,12 @@ classdef (Abstract) Recording < handle
 
                     stream = self.continuous(streams{j});
 
-                    if stream.metadata.processorId == sync.processorId && ...
-                            stream.metadata.subprocessorId == sync.subprocessorId
+                    if strcmp(stream.metadata.streamName, sync.streamName)
 
-                        stream.globalTimestamps = stream.timestamps - sync.start * sync.scaling + sync.offset;
+                        stream.globalTimestamps = (stream.sampleNumbers - sync.start) * sync.scaling + sync.offset;
 
                         if self.format ~= "NWB"
 
-                            sync.sampleRate
                             stream.globalTimestamps = double(stream.globalTimestamps) / sync.sampleRate;
 
                         end
