@@ -7,16 +7,14 @@ RECORDED_DATA = ["Raw", "BP (300-6k) + Spikes", "BP (1-10) + Events (Peaks)"];
 SAMPLING_RATE = 40000; % samples / sec
 RECORDING_TIME = 4; % seconds
 
-% Update this path to point to your own recording
-DATA_PATH = 'C:/Users/Pavel/OneDrive/Documents/Open Ephys/';
-%DATA_PATH = 'C:/open-ephys/0.6.3_smokeTest/';
+DATA_PATH = 'C:/open-ephys/load_all_formats/';
 
 % Pulls the latest NUM_TESTS recordings by folder datetime 
 NUM_TESTS = length(RECORDING_FORMATS_TO_TEST);
 latest_recordings = Utils.getLatestRecordings(DATA_PATH,NUM_TESTS);
 
 % Flag to plot data after test 
-show = false;
+show = true;
 if show
     % Define visualization figure
     set(0,'units','pixels'); 
@@ -25,10 +23,8 @@ if show
     SCREEN_Y = s(4);
     FIGURE_X_SIZE = SCREEN_X / 2;
     FIGURE_Y_SIZE = SCREEN_Y;
-
-    set(0,'DefaultFigureWindowStyle','docked');
     f = figure();
-    %f.set('Position', [SCREEN_X / 2 0 FIGURE_X_SIZE FIGURE_Y_SIZE]);
+    f.set('Position', [SCREEN_X / 2 0 FIGURE_X_SIZE FIGURE_Y_SIZE]);
 end
 
 count = 1;
@@ -68,6 +64,7 @@ for idx = 1:length(RECORDING_FORMATS_TO_TEST)
                 % 2. Plot first channel of continuous data 
                 if show 
                     subplot(length(RECORDING_FORMATS_TO_TEST)*length(RECORDED_DATA),1,count);
+                    Utils.log("First timestamp: ", num2str(data.timestamps(1,:)));
                     plot(data.timestamps, data.samples(1,:), 'LineWidth', 1.5);
                     title(recording.format, RECORDED_DATA(i)); hold on;
                 end
@@ -77,8 +74,9 @@ for idx = 1:length(RECORDING_FORMATS_TO_TEST)
                 for p = 1:length(eventProcessors)
                     processor = eventProcessors{p};
                     events = recording.ttlEvents(processor);
+                    Utils.log("Found recording format: ", recording.format);
                     if ~isempty(events)
-                        for n = 1:length(events.channel)
+                        for n = 1:length(events.line)
                             if show && events.state(n) == 1
                                 line([events.timestamp(n), events.timestamp(n)], [-4000,2000], 'Color', 'red', 'LineWidth', 0.2);
                             end
