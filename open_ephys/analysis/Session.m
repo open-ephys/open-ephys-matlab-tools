@@ -78,7 +78,7 @@ classdef Session < handle
             for i = 1:length(self.recordNodes)
 
                 node = self.recordNodes{i};
-                fprintf("Found record node: (%d) %s : %s Format \n", i, node.name, node.format);
+                fprintf("(%d) %s : %s Format \n", i, node.name, node.format);
 
             end
 

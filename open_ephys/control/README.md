@@ -2,6 +2,160 @@
 
 This module makes it possible to control the [Open Ephys GUI](https://open-ephys.org/gui) via Matlab, either running locally or over a network.
 
+## OpenEphysHTTPServer
+
+Starting in GUI v0.6.0 we recommend using the OpenEphysHTTPServer to control the GUI remotely. 
+
+### Usage
+
+Create an instance of the OpenEphysHTTPServer class:
+
+```matlab
+gui = OpenEphysHTTPServer('127.0.0.1', 34947)
+```
+
+Get the processor list (all available processors to use in a signal chain)
+
+```matlab
+gui.getProcessorList()
+```
+
+Get the processors in the current signal chain
+
+```matlab
+gui.getProcessors()
+```
+
+Clear the current signal chain
+
+```matlab
+gui.clearSignalChain()
+```
+
+Add a processor to the signal chain (source and destination are optional, if not included will add to end of signal chain)
+
+```matlab
+gui.addProcessor(processorName, source, destination)
+```
+
+Delete a processor from the signal chain
+
+```matlab
+gui.deleteProcessor(processorId)
+```
+
+Get the parameters for a processor
+
+```matlab
+gui.getParameters(processorId, streamIdx)
+```
+
+Set the parameters for a processor
+
+```matlab
+gui.setParameter(processorId, streamIdx, paramName, value)
+```
+
+Get recording information
+
+```matlab
+gui.getRecordingInfo(key)
+```
+
+Set parent recording directory
+    
+```matlab
+gui.setParentDirectory(path)
+```
+
+Set prepend text
+
+```matlab
+gui.setPrependText(text)
+```
+
+Set base text
+
+```matlab
+gui.setBaseText(text)
+```
+
+Set append text
+
+```matlab
+gui.setAppendText(text)
+```
+
+Set start new directory flag (starts a new directory for the next recording)
+
+```matlab
+gui.setStartNewDirectory()
+```
+
+Set file path to load for a FileReader
+
+```matlab
+gui.setFileReaderPath(nodeId, path)
+```
+
+Set file index to load for a FileReader
+
+```matlab
+gui.setFileReaderIndex(nodeId, index)
+```
+
+Set record engine
+
+```matlab
+gui.setRecordEngine(nodeId, engine)
+```
+
+Set record path
+
+```matlab
+gui.setRecordPath(nodeId, directory)
+```
+
+Get GUI status (acquiring, recording or idle)
+
+```matlab
+gui.getStatus()
+```
+
+Start acquisition (duration is optional)
+
+```matlab
+gui.acquire(duration)
+```
+
+Stop recording (duration is optional)
+
+```matlab
+gui.record(duration)
+```
+
+Stop acquisition/recording (duration is optional)
+
+```matlab
+gui.idle(duration)
+```
+
+Send a text message to all processors in the signal chain
+
+```matlab
+gui.message(text)
+```
+
+Quit the GUI
+
+```matlab
+gui.quit()
+```
+
+## NetworkControl
+
+### Usage
+
 Your GUI's signal chain must include a [NetworkEvents](https://open-ephys.github.io/gui-docs/User-Manual/Plugins/Network-Events.html) plugin in order for this module to work.
 
 To use the control module in Matlab:

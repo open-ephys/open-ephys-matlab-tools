@@ -20,7 +20,11 @@ All scripts and classes are available in the open-ephys directory. Make sure the
 
 See the [control module README file](open_ephys/control/README.md) for how to setup zmq with Matlab.
 
+Using the OpenEphysHTTPServer class is recommended for remote control of the GUI in v0.6+.
+
 ## Usage
+
+Example scripts are included in the `examples` directory. The following sections provide a brief overview of the functionality of each module.
 
 ### analysis
 
@@ -35,27 +39,34 @@ If the directory contains data from one more Record Nodes (GUI version 0.5+), th
 If your directory just contains data (any GUI version), individual recordings can be accessed via `session.recordings`. The format of the recordings will be detected automatically as either 
 [Binary](https://open-ephys.github.io/gui-docs/User-Manual/Recording-data/Binary-format.html), 
 [Open Ephys](https://open-ephys.github.io/gui-docs/User-Manual/Recording-data/Binary-format.html), 
-[NWB 1.0](https://open-ephys.github.io/gui-docs/User-Manual/Recording-data/NWB-format.html), or 
-[KWIK](https://open-ephys.github.io/gui-docs/User-Manual/Recording-data/KWIK-format.html).
+[NWB 2.0](https://open-ephys.github.io/gui-docs/User-Manual/Recording-data/NWB-format.html).
+ 
+([KWIK](https://open-ephys.github.io/gui-docs/User-Manual/Recording-data/KWIK-format.html) is no longer supported)
 
 Each `recording` object has the following fields:
 
 * `continuous` : continuous data for each subprocessor in the recording
 * `spikes` : spikes for each electrode group
 * `events` : Pandas `DataFrame` Matlab analog of event times and metadata
+* `messages` : text messages sent to the GUI during recording
 
 More details about `continuous`, `spikes`, and `events` objects can be found in the [analysis module README file](open_ephys/analysis/README.md).
 
 ### control
 
 ```matlab
-url = '10.128.50.10' % IP address of the computer running Open Ephys 
-port = 2000 
+host = '127.0.0.1' % IP address of the computer running Open Ephys
+port = 37497 % EPHYS on a phone keypad 
 
-gui = NetworkControl(url, port)
+gui = OpenEphysHTTPServer(host, port)
 
-gui.startAcquisition %starts acquisition
+gui.acquire() % start acquisition
+gui.record() % start recording
+gui.idle() % stop recording and/or acquisition
+gui.quit() % quit the GUI
 ```
+
+See all API endpoints in the [control module README file](open_ephys/control/README.md).
 
 ### streaming
 
