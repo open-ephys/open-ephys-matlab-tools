@@ -109,7 +109,7 @@ classdef OpenEphysHTTPServer < handle
             
         end
 
-        function processors = get_processor_list(self)
+        function processors = getProcessorList(self)
 
 %           Returns all available processors in the GUI's Processor List
 
@@ -118,13 +118,13 @@ classdef OpenEphysHTTPServer < handle
 
         end
 
-        function processors = get_processors(self, varargin)
+        function processors = getProcessors(self, varargin)
     
 %           Get the list of processors.
     
 %           Parameters
 %           ----------
-%           filter_by_name : String (Optional)
+%           filterByName : String (Optional)
 %               Filter the list by processor name.
     
             data = self.send('/api/processors');
@@ -136,7 +136,7 @@ classdef OpenEphysHTTPServer < handle
     
         end
 
-        function resp = clear_signal_chain(self)
+        function resp = clearSignalChain(self)
 
 %           Clear the signal chain.
 
@@ -144,7 +144,7 @@ classdef OpenEphysHTTPServer < handle
 
         end
         
-        function resp = add_processor(self, name, varargin)
+        function resp = addProcessor(self, name, varargin)
 
 %           Add a processor to the signal chain.
 % 
@@ -180,7 +180,7 @@ classdef OpenEphysHTTPServer < handle
         end
         
         
-        function resp = delete_processor(self, id)
+        function resp = deleteProcessor(self, id)
 
 %           Delete a processor.
 % 
@@ -197,42 +197,42 @@ classdef OpenEphysHTTPServer < handle
         end
         
     
-        function resp = get_parameters(self, processor_id, stream_index)
+        function resp = getParameters(self, processorId, streamIndex)
 
 %           Get parameters for a stream.
 % 
 %           Parameters
 %           ----------
-%           processor_id : Integer
+%           processorId : Integer
 %               The 3-digit processor ID (e.g. 101)
-%           stream_index : Integer
+%           streamIndex : Integer
 %               The index of the stream (e.g. 0).
 % 
-            endpoint = strcat('/api/processors/', num2str(processor_id), '/streams/', num2str(stream_index), '/parameters');
+            endpoint = strcat('/api/processors/', num2str(processorId), '/streams/', num2str(streamIndex), '/parameters');
             resp = self.send(endpoint).parameters;
             
         end
        
-        function resp = set_parameter(self, processor_id, stream_index, param_name, value)
+        function resp = setParameters(self, processorID, streamIndex, paramName, value)
 
 %           Update a parameter value
 % 
 %           Parameters
 %           ----------
-%           processor_id : Integer
+%           processorID : Integer
 %               The 3-digit processor ID (e.g. 101)
-%           stream_index : Integer
+%           streamIndex : Integer
 %               The index of the stream (e.g. 0)
-%           param_name : String
+%           paramName : String
 %               The parameter name (e.g. low_cut)
 %           value : Any
 %               The parameter value (must match the parameter type).
 %               Hint: Float parameters must be sent with a decimal 
 %               included (e.g. 1000.0 instead of 1000)
 % 
-            endpoint = strcat('/api/processors/', num2str(processor_id), '/streams/', num2str(stream_index), '/parameters/', param_name);
+            endpoint = strcat('/api/processors/', num2str(processorID), '/streams/', num2str(streamIndex), '/parameters/', paramName);
             
-%           TOFIX:, matlab automatically casts doubles to int if no
+%           TO FIX:matlab automatically casts doubles to int if no
 %           integers after the decimal point of a float.
             if isa(value, 'double')
                 payload = struct('value', [], 'class', {'double'});
@@ -245,7 +245,7 @@ classdef OpenEphysHTTPServer < handle
         end
        
 
-        function resp = get_recording_info(self, varargin)
+        function resp = getRecordingInfo(self, varargin)
             
 %           Get recording information.
 % 
@@ -265,7 +265,7 @@ classdef OpenEphysHTTPServer < handle
             end
         end
     
-        function resp = set_parent_dir(self, path)
+        function resp = setParentDirectory(self, path)
             
 %           Set the parent directory.
 % 
@@ -280,7 +280,7 @@ classdef OpenEphysHTTPServer < handle
 
         end
         
-        function resp = set_prepend_text(self, text)
+        function resp = setPrependText(self, text)
             
 %           Set the prepend text.
 % 
@@ -295,7 +295,7 @@ classdef OpenEphysHTTPServer < handle
 
         end
 
-        function resp = set_base_text(self, text)
+        function resp = setBaseText(self, text)
             
 %           Set the base text.
 % 
@@ -310,7 +310,7 @@ classdef OpenEphysHTTPServer < handle
 
         end
         
-        function resp = set_append_text(self, text)
+        function resp = setAppendText(self, text)
             
 %           Set the append text.
 % 
@@ -326,7 +326,7 @@ classdef OpenEphysHTTPServer < handle
         end
         
 
-        function resp = set_start_new_dir(self)
+        function resp = setStartNewDirectory(self)
             
 %           Set if GUI should start a new directory for the next recording.
 
@@ -336,56 +336,56 @@ classdef OpenEphysHTTPServer < handle
             
         end
         
-        function resp = set_file_path(self, node_id, file_path)
+        function resp = setFileReaderPath(self, nodeId, filePath)
             
 %           Set the file path.
 
 %           Parameters
 %           ----------
-%           node_id : Integer
+%           nodeId : Integer
 %               The node ID.
-%           file_path : String
+%           filePath : String
 %               The file path.
 
-            endpoint = strcat('/api/processors/', num2str(node_id), '/config');
-            payload = struct('text', strcat("file=", num2str(file_path)));
+            endpoint = strcat('/api/processors/', num2str(nodeId), '/config');
+            payload = struct('text', strcat("file=", num2str(filePath)));
             data = self.send(endpoint, payload);
             
             resp = data;
             
         end
         
-        function resp = set_file_index(self, node_id, file_index)
+        function resp = setFileReaderIndex(self, nodeId, fileIndex)
 
 %           Set the file index.
 % 
 %           Parameters
 %           ----------
-%           node_id : Integer
+%           nodeId : Integer
 %               The node ID.
-%           file_index : Integer
+%           fileIndex : Integer
 %               The file index.
 
-            endpoint = strcat('/api/processors/', num2str(node_id), '/config');
-            payload = struct('text', strcat("index=", num2str(file_index)));
+            endpoint = strcat('/api/processors/', num2str(nodeId), '/config');
+            payload = struct('text', strcat("index=", num2str(fileIndex)));
             data = self.send(endpoint, payload);
             
             resp = data;
 
         end
         
-        function resp = set_record_engine(self, node_id, engine)
+        function resp = setRecordEngine(self, nodeId, engine)
 
 %           Set the record engine for a record node.
 %
 %           Parameters
 %           ----------
-%           node_id : Integer
+%           nodeId : Integer
 %               The node ID.
 %           engine: Integer
 %               The record engine index.
 
-            endpoint = strcat('/api/processors/', num2str(node_id), '/config');
+            endpoint = strcat('/api/processors/', num2str(nodeId), '/config');
             payload = struct('text', strcat("engine=", engine));
             data = self.send(endpoint, payload);
             
@@ -393,25 +393,25 @@ classdef OpenEphysHTTPServer < handle
             
         end
         
-        function resp = set_record_path(self, node_id, directory)
+        function resp = setRecordPath(self, nodeId, directory)
             
 %           Set the record path for a Record Node
 %
 %           Parameters
 %           ----------
-%           node_id: Integer
+%           nodeId: Integer
 %               The node ID.
 %           directory : String
 %               The record path.
 
-            endpoint = strcat('/api/recording/', num2str(node_id));
+            endpoint = strcat('/api/recording/', num2str(nodeId));
             payload = struct('parent_directory', directory);
             data = self.send(endpoint, payload);
             
             resp = data; 
             
         end
-        function resp = status(self)
+        function resp = getStatus(self)
             
 %           Returns the current status of the GUI (IDLE, ACQUIRE, or RECORD)
 
@@ -477,7 +477,7 @@ classdef OpenEphysHTTPServer < handle
         
         function resp = idle(self, varargin)
             
-%           Start recording.
+%           Stop acquisition/recording.
 %
 %           Parameters
 %           ----------
