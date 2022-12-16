@@ -50,7 +50,7 @@ for i = 1:nRecordNodes
 
         for k = 1:length(streamNames)
 
-            streamName = streamNames{k};
+            streamName = streamNames{k};    
 
             % Get the continuous data from the current stream
             data = recording.continuous(streamName);
@@ -84,7 +84,7 @@ for i = 1:nRecordNodes
                         recording.addSyncLine( ...
                             events.line(1), ...
                             events.processor_id(1), ...
-                            events.stream_index(1), ...
+                            events.stream_name(1), ...
                             channel, ...
                             isMain);
                             
@@ -135,4 +135,4 @@ end
     
 
 % Save result 
-exportgraphics(gcf(), fullfile("tests", TEST_NAME + ".pdf"));
+exportgraphics(gcf(), fullfile("examples", TEST_NAME + ".pdf"));
