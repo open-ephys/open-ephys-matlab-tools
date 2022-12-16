@@ -123,8 +123,10 @@ classdef BinaryRecording < Recording
 
                 id = [processorName, '-', num2str(fullId{1}) '.' num2str(fullId{2})];
 
-                self.ttlEvents(id) = DataFrame(abs(lines), sampleNumbers, timestamps, processorId*ones(length(lines),1), streamIdx*ones(length(lines),1), lines > 0, ...
-                    'VariableNames', {'line','sample_number','timestamp','processor_id', 'stream_index', 'state'});
+                numEvents = length(lines);
+
+                self.ttlEvents(id) = DataFrame(abs(lines), sampleNumbers, timestamps, processorId*ones(numEvents,1), repmat(string(id),numEvents,1), lines > 0, ...
+                    'VariableNames', {'line','sample_number','timestamp','processor_id', 'stream_name', 'state'});
                 
                 streamIdx = streamIdx + 1;
 
