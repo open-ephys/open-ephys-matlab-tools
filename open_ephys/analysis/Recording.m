@@ -106,8 +106,8 @@ classdef (Abstract) Recording < handle
             %     event channel number
             % processorId : int
             %     ID for the processor receiving sync events
-            % streamIdx : int
-            %     index of the subprocessor receiving sync events
+            % streamName : string
+            %     name of the stream the line belongs to
             %     default = 0
             % main : bool
             %     if True, this processors timestamps will be treated as the main clock
@@ -120,7 +120,7 @@ classdef (Abstract) Recording < handle
             syncChannel = {};
             syncChannel.line = line;
             syncChannel.processorId = processorId;
-            syncChannel.streamIdx = streamIdx;
+            syncChannel.streamName = streamName;
             syncChannel.isMain = isMain;
             syncChannel.streamName = streamName;
 
@@ -136,7 +136,7 @@ classdef (Abstract) Recording < handle
 
             for i = 1:length(self.syncLines)
 
-                if self.syncLines{i}.processorId == processorId && self.syncLines{i}.streamIdx == streamIdx
+                if self.syncLines{i}.processorId == processorId && strcmp(self.syncLines{i}.streamName, streamName)
 
                     Utils.log("Found existing sync line, overwriting with new line!");
                     self.syncLines{streamIdx} = syncChannel;
@@ -220,7 +220,7 @@ classdef (Abstract) Recording < handle
 
                         if events.line(1) == self.syncLines{i}.line && ...
                             events.processor_id(1) == self.syncLines{i}.processorId && ...
-                            events.stream_index(1) == self.syncLines{i}.streamIdx
+                            events.stream_name(1) == self.syncLines{i}.streamName
 
                             auxStartSample = events.sample_number(1);
                             auxTotalSamples = events.sample_number(end) - auxStartSample;
