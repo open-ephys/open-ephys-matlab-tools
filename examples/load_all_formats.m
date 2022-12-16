@@ -114,4 +114,4 @@ for idx = 1:length(RECORDING_FORMATS_TO_TEST)
 end
 
 % Save result 
-exportgraphics(gcf(), fullfile("tests", "load_all_formats.pdf"));
+exportgraphics(gcf(), fullfile("examples", "load_all_formats.pdf"));

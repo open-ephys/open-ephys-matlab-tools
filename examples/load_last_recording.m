@@ -107,4 +107,4 @@ end
     
 
 % Save result 
-exportgraphics(gcf(), fullfile("tests", "load_last_recording.pdf"));
+exportgraphics(gcf(), fullfile("examples", "load_last_recording.pdf"));
