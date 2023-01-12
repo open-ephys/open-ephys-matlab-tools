@@ -16,6 +16,10 @@ It consists of three modules:
 
 ## Installation
 
+Latest version always available for download: 
+
+[![View open-ephys-matlab-tools on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/122372-open-ephys-matlab-tools)
+
 All scripts and classes are available in the open-ephys directory. Make sure the open-ephys directory and the data to be analyzed are both on the Matlab search path.
 
 See the [control module README file](open_ephys/control/README.md) for how to setup zmq with Matlab.
