@@ -85,7 +85,7 @@ classdef BinaryRecording < Recording
                 stream.samples = reshape(data.Data, [stream.metadata.numChannels, length(data.Data) / stream.metadata.numChannels]);
 
                 streamKey = stream.metadata.id;
-                
+
                 % Check for split stream and trim name to match source
                 if (streamKey(end-1) == "-")
                     streamKey = streamKey(1:end-2);
@@ -108,24 +108,24 @@ classdef BinaryRecording < Recording
 
                 files = regexp(ttlDirectories{i},filesep,'split');
 
-                node = regexp(files{length(files)-2},'-','split');
-                processorName = node{1};
-                if length(node) > 2
-                    node = { node{1}, strjoin(node((2:length(node))), '-') };
-                end
-                fullId = strsplit(node{1,length(node)},'.');
-                processorId = str2num(fullId{1});
-                subprocessorId = str2num(fullId{2});
+                % Assumes full stream name always in the form
+                % <PROCESSOR_NAME>_<PROCESSOR_ID>.<STREAM_ID>
+                fullStreamName = files{length(files)-2};
+
+                stream = regexp(fullStreamName,'\.','split');
                 
+                processor = stream{1};
+                streamName = stream{2};
+
+                processorId = str2double(processor(length(processor)-2:end));
+
                 lines = readNPY(fullfile(ttlDirectories{i}, 'states.npy'));
                 sampleNumbers = readNPY(fullfile(ttlDirectories{i}, 'sample_numbers.npy'));
                 timestamps = readNPY(fullfile(ttlDirectories{i}, 'timestamps.npy'));
 
-                id = [processorName, '-', num2str(fullId{1}) '.' num2str(fullId{2})];
-
                 numEvents = length(lines);
 
-                self.ttlEvents(id) = DataFrame(abs(lines), sampleNumbers, timestamps, processorId*ones(numEvents,1), repmat(string(id),numEvents,1), lines > 0, ...
+                self.ttlEvents(fullStreamName) = DataFrame(abs(lines), sampleNumbers, timestamps, processorId*ones(numEvents,1), repmat(string(streamName),numEvents,1), lines > 0, ...
                     'VariableNames', {'line','sample_number','timestamp','processor_id', 'stream_name', 'state'});
                 
                 streamIdx = streamIdx + 1;
