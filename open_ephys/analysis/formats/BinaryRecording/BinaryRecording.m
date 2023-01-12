@@ -125,7 +125,7 @@ classdef BinaryRecording < Recording
 
                 numEvents = length(lines);
 
-                self.ttlEvents(fullStreamName) = DataFrame(abs(lines), sampleNumbers, timestamps, processorId*ones(numEvents,1), repmat(string(streamName),numEvents,1), lines > 0, ...
+                self.ttlEvents(fullStreamName) = DataFrame(abs(lines), sampleNumbers, timestamps, processorId*ones(numEvents,1), repmat(string(fullStreamName),numEvents,1), lines > 0, ...
                     'VariableNames', {'line','sample_number','timestamp','processor_id', 'stream_name', 'state'});
                 
                 streamIdx = streamIdx + 1;
