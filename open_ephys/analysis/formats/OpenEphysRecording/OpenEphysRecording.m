@@ -140,7 +140,7 @@ classdef OpenEphysRecording < Recording
                 % Find all continuous files belonging to this stream
                 streamFiles = {};
                 for j = 1:length(files)
-                    if contains(files{j}, currentStream)
+                    if contains(erase(files{j},["_"," "]), erase(currentStream, ["_"," "]))
                         streamName = split(currentStream, '_');
                         processorId = streamName{1};
                         streamFiles{end+1} = files{j};
@@ -151,7 +151,7 @@ classdef OpenEphysRecording < Recording
 
                 [sampleNumbers, ~, ~, validRecords] = self.loadContinuousFile(streamFiles{1});
 
-                filename = fullfile(self.directory, strcat(currentStream, ".timestamps"));
+                filename = fullfile(self.directory, strcat(erase(currentStream,[" "]), ".timestamps"));
 
                 data = memmapfile(filename, 'Writable', false, 'Offset', 0, 'Format', 'double');
 
