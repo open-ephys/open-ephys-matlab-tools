@@ -7,7 +7,11 @@ RECORDED_DATA = ["Raw", "BP (300-6k) + Spikes", "BP (1-10) + Events (Peaks)"];
 SAMPLING_RATE = 40000; % samples / sec
 RECORDING_TIME = 4; % seconds
 
-DATA_PATH = 'C:/open-ephys/load_all_formats/';
+% Download example data set from the link below and update DATA_PATH variable to point to it.
+% https://www.dropbox.com/scl/fo/kxrbi4e5bjceofj3v02i6/h?dl=0&rlkey=7gu4t2h3bn4vjpj5qf02luwna
+
+% UPDATE THIS TO YOUR LOCAL DATA PATH ( note the trailing '\' is required )
+DATA_PATH = 'D:\load_all_formats\';
 
 % Pulls the latest NUM_TESTS recordings by folder datetime 
 NUM_TESTS = length(RECORDING_FORMATS_TO_TEST);
@@ -64,8 +68,8 @@ for idx = 1:length(RECORDING_FORMATS_TO_TEST)
                 % 2. Plot first channel of continuous data 
                 if show 
                     subplot(length(RECORDING_FORMATS_TO_TEST)*length(RECORDED_DATA),1,count);
-                    Utils.log("First timestamp: ", num2str(data.timestamps(1,:)));
-                    plot(data.timestamps, data.samples(1,:), 'LineWidth', 1.5);
+                    % Utils.log("First timestamp: ", num2str(data.timestamps(1,:)));
+                    plot(data.timestamps(1:length(data.sampleNumbers)), data.samples(1,:), 'LineWidth', 1.5);
                     title(recording.format, RECORDED_DATA(i)); hold on;
                 end
 

@@ -1,8 +1,8 @@
 % "Import" matlab-tools
 addpath(genpath("."));
 
-% Update this path to point to your own recording
-DATA_PATH = 'C:/Users/Pavel/OneDrive/Documents/Open Ephys/';
+% Update this path to point to your own recording directory
+DATA_PATH = 'D:\test-suite\data\';
 
 % Pulls the latest NUM_REC recordings by folder datetime
 NUM_REC = 1;
