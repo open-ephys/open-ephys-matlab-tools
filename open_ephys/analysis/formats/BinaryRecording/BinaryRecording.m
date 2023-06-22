@@ -47,8 +47,6 @@ classdef BinaryRecording < Recording
 
         function self = loadContinuous(self)
 
-            syncMessages = self.loadSyncMessages();
-
             for i = 1:length(self.info.continuous)
 
                 directory = fullfile(self.directory, 'continuous', self.info.continuous(i).folder_name);
@@ -70,12 +68,6 @@ classdef BinaryRecording < Recording
 
                 stream.metadata.id = num2str(stream.metadata.streamName);
 
-                % Utils.log("Found streams:");
-                % availableKeys = keys(syncMessages);
-                % for j = 1:length(keys(syncMessages))
-                %     Utils.log("    ", availableKeys{j});
-                % end
-
                 stream.timestamps = readNPY(fullfile(directory, 'timestamps.npy'));
 
                 stream.sampleNumbers = readNPY(fullfile(directory, 'sample_numbers.npy'));
@@ -84,13 +76,7 @@ classdef BinaryRecording < Recording
 
                 stream.samples = reshape(data.Data, [stream.metadata.numChannels, length(data.Data) / stream.metadata.numChannels]);
 
-                streamKey = stream.metadata.id;
-
-                % Check for split stream and trim name to match source
-                if (streamKey(end-1) == "-")
-                    streamKey = streamKey(1:end-2);
-                end
-                stream.metadata.startTimestamp = syncMessages(streamKey);
+                stream.metadata.startTimestamp = stream.timestamps(1);
 
                 self.continuous(stream.metadata.id) = stream;
 
