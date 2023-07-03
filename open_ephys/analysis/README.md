@@ -81,3 +81,4 @@ If spike data has been saved by your Record Node (i.e., there is a Spike Detecto
 - `timestamps` - `array` of synchronized timestamps (if available) for each spike
 - `sample_numbers` - `array` of sample indices for each spike
 - `electrodes` - `array` containing the index of the electrode from which each spike originated
+- `clusters` - `array` containing the cluster IDs for each spike (default cluster = 0)
