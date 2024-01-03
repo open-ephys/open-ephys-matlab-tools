@@ -162,7 +162,7 @@ classdef OpenEphysHTTPServer < handle
 
 %           If only processor name is specified, set source to most recently added processor
             if nargin == 2
-                existingProcessors = self.get_processors();
+                existingProcessors = self.getProcessors();
                 if ~isempty(existingProcessors)
                     index = find([existingProcessors.id] == max([existingProcessors.id]));
                     mostRecentProcessor = existingProcessors(index);
@@ -489,7 +489,7 @@ classdef OpenEphysHTTPServer < handle
 %               By default, this command will stop
 %               acquisition/recording and return immediately.
 
-            mode = self.status().mode;
+            mode = self.getStatus().mode;
 
             payload = struct('mode', 'IDLE');
             data = self.send('/api/status', payload);
