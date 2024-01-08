@@ -11,7 +11,7 @@ Starting in GUI v0.6.0 we recommend using the OpenEphysHTTPServer to control the
 Create an instance of the OpenEphysHTTPServer class:
 
 ```matlab
-gui = OpenEphysHTTPServer('127.0.0.1', 34947)
+gui = OpenEphysHTTPServer('127.0.0.1', 37497)
 ```
 
 Get the processor list (all available processors to use in a signal chain)
