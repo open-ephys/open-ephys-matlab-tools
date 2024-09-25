@@ -519,6 +519,25 @@ classdef OpenEphysHTTPServer < handle
             resp = data;
             
         end
+
+        function resp = config(self, nodeId, message)
+
+%           Send a configuration message to a specific processor.
+%           
+%           Parameters
+%           ----------
+%           nodeId : Integer
+%               The 3-digit processor ID (e.g. 101)
+%           message : String
+%               The message to send.
+
+            endpoint = strcat('/api/processors/', num2str(nodeId), '/config');
+            payload = struct('text', message);
+            data = self.send(endpoint, payload);
+            
+            resp = data;
+            
+        end
         
         function resp = quit(self)
 
