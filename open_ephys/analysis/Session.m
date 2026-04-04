@@ -64,7 +64,7 @@ classdef Session < handle
 
         function self = detectRecordNodes(self)
 
-            paths = glob(fullfile(self.directory, 'Record Node *'));
+             paths = glob(char(fullfile(self.directory, 'Record Node *')));
 
             for i = 1:length(paths)
                 self.recordNodes{end+1} = RecordNode(paths{i});
