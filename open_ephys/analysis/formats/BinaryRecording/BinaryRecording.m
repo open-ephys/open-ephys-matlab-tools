@@ -234,7 +234,12 @@ classdef BinaryRecording < Recording
             for expIdx = 1:length(experimentDirectories)
 
                 recordingDirectories = glob(fullfile(experimentDirectories{expIdx}, 'recording*'));
-                %sort
+                if length(recordingDirectories) > 1  % if multiple files, sort by number
+                    recordingName = split(string(recordingDirectories), filesep);
+                    recordingNumber = double(string(regexp(recordingName(:, end-1), "(?<=recording)\d+", 'match')));
+                    [~, idx] = sort(recordingNumber);
+                    recordingDirectories = recordingDirectories(idx);
+                end
 
                 for recIdx = 1:length(recordingDirectories)
                     recordings{end+1} = BinaryRecording(recordingDirectories{recIdx}, expIdx, recIdx);
